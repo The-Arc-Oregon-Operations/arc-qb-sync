@@ -16,18 +16,40 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Parse the Keywords / Tags field value into a clean array of tag strings.
  *
- * ⚠️ Delimiter TBD — assumes newline (\n). Change $delimiter if the live
- * QB API response for field 56 uses a different separator (e.g. comma, pipe).
+ * QB field 56 (Keywords / Tags) returns a PHP array via the REST API.
+ * Falls back to newline-splitting for plain string values.
  *
- * @param string $raw  Raw value from QB field 56.
- * @return string[]    Array of trimmed, non-empty tag strings.
+ * @param mixed $raw  Raw value from QB field 56 (array or string).
+ * @return string[]   Array of trimmed, non-empty tag strings.
  */
 function arc_qb_parse_tags( $raw ) {
-	$delimiter = "\n"; // TODO: verify against live QB API response for field 56
+	if ( is_array( $raw ) ) {
+		return array_values( array_filter( array_map( 'trim', $raw ) ) );
+	}
 	$tags = array_filter(
-		array_map( 'trim', explode( $delimiter, (string) $raw ) )
+		array_map( 'trim', explode( "\n", (string) $raw ) )
 	);
 	return array_values( $tags );
+}
+
+/**
+ * Format a Quickbase Duration field value (milliseconds) as a human-readable
+ * hours string, e.g. 23400000 → "6.5 hours".
+ *
+ * @param mixed $ms  Raw QB duration value in milliseconds.
+ * @return string    Formatted string, e.g. "6.5 hours" or "2 hours".
+ */
+function arc_qb_format_duration( $ms ) {
+	if ( ! is_numeric( $ms ) || intval( $ms ) <= 0 ) {
+		return esc_html( (string) $ms );
+	}
+	$hours = intval( $ms ) / 3600000;
+	if ( $hours === floor( $hours ) ) {
+		$formatted = number_format( (int) $hours ) . ' hours';
+	} else {
+		$formatted = rtrim( rtrim( number_format( $hours, 1 ), '0' ), '.' ) . ' hours';
+	}
+	return $formatted;
 }
 
 /**

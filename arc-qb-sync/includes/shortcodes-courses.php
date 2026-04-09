@@ -64,13 +64,13 @@ function arc_qb_sc_course_description() {
 	return wp_kses_post( wpautop( $html ) );
 }
 
-/* Hours of Instruction */
+/* Hours of Instruction — QB returns Duration in milliseconds; format as "X hours" */
 function arc_qb_sc_course_length() {
 	$record = arc_qb_get_course();
 	if ( is_wp_error( $record ) ) {
 		return '';
 	}
-	return esc_html( arc_qb_get_course_field( $record, 14 ) );
+	return arc_qb_format_duration( arc_qb_get_course_field( $record, 14 ) );
 }
 
 /* Tags — rendered as <span class="arc-tag"> pills */

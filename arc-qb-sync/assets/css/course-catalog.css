@@ -4,18 +4,38 @@
 .arc-catalog-filters {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
+    gap: 0.4rem;
     margin-bottom: 1.5rem;
 }
 
-.arc-filter-pill {
+.arc-catalog-filters .arc-filter-pill {
     cursor: pointer;
-    /* Visual styling intentionally left to Elementor/theme */
+    display: inline-block;
+    padding: 0.2rem 0.8rem;
+    font-size: 0.78rem;
+    font-style: normal !important;
+    font-weight: 500 !important;
+    line-height: 1.6;
+    border-radius: 2rem;
+    border: 1.5px solid #c0c0c0 !important;
+    background: #f0f0f0 !important;
+    color: #484847 !important;
+    box-shadow: none !important;
+    min-height: unset !important;
+    height: auto !important;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
 }
 
-.arc-filter-pill.is-active {
-    /* Indicate active state — override in Elementor as needed */
-    font-weight: bold;
+.arc-catalog-filters .arc-filter-pill.is-active {
+    background: #EA7125 !important;
+    border-color: #EA7125 !important;
+    color: #fff !important;
+    font-weight: 600 !important;
+}
+
+.arc-catalog-filters .arc-filter-pill:hover:not(.is-active) {
+    background: #e2e2e2 !important;
+    border-color: #aaa !important;
 }
 
 .arc-catalog-grid {

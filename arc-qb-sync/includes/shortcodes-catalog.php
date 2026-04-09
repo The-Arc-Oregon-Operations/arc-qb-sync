@@ -93,7 +93,7 @@ function arc_qb_sc_course_catalog() {
 	foreach ( $courses as $course ) {
 		$id          = intval( arc_qb_get_course_field( $course, 3 ) );
 		$title       = arc_qb_get_course_field( $course, 6 );
-		$length      = arc_qb_get_course_field( $course, 14 );
+		$length      = arc_qb_format_duration( arc_qb_get_course_field( $course, 14 ) );
 		$image_url   = arc_qb_get_course_field( $course, 88 );
 		$raw_tags    = arc_qb_get_course_field( $course, 56 );
 		$tags        = arc_qb_parse_tags( $raw_tags );
