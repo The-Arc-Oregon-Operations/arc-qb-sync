@@ -1,0 +1,58 @@
+/* Arc Oregon Course Catalog — structural styles */
+/* Visual styling is intentionally minimal; Elementor/theme handles the rest. */
+
+.arc-catalog-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.arc-filter-pill {
+    cursor: pointer;
+    /* Visual styling intentionally left to Elementor/theme */
+}
+
+.arc-filter-pill.is-active {
+    /* Indicate active state — override in Elementor as needed */
+    font-weight: bold;
+}
+
+.arc-catalog-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.arc-catalog-tile {
+    display: flex;
+    flex-direction: column;
+}
+
+.arc-catalog-tile__image img {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    display: block;
+}
+
+.arc-catalog-tile__body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.arc-catalog-tile__cta {
+    margin-top: auto;
+}
+
+.arc-catalog-tile__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    margin-bottom: 0.75rem;
+}
+
+.arc-tile--hidden {
+    display: none !important;
+}

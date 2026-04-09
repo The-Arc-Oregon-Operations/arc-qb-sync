@@ -1,0 +1,78 @@
+# Arc QB Sync — Setup Guide
+
+## wp-config.php Constants
+
+Add these constants to `wp-config.php` on the WordPress server **before** activating the plugin.
+
+### Existing constants (already present for arc-training-details v0.4.0)
+
+| Constant | Description | Where to find the value |
+|---|---|---|
+| `QB_REALM_HOST` | Quickbase realm hostname | Your QB subdomain, e.g. `otac.quickbase.com` |
+| `QB_TABLE_ID` | Events table ID (Training Events) | QB App → Tables → Training Events → table ID in URL, e.g. `bc7mmze9k` |
+| `QB_USER_TOKEN` | Quickbase user token for API auth | QB Profile → My User Information → Manage User Tokens |
+
+### New constants (required for Courses module)
+
+| Constant | Description | Where to find the value |
+|---|---|---|
+| `QB_COURSES_TABLE_ID` | Course Catalog table ID | QB App → Tables → Course Catalog → table ID in URL, e.g. `bc7mmze9m` |
+| `ARC_QB_CACHE_BUST_TOKEN` | Shared secret for Zapier → WP cache invalidation | Generate a strong random string (e.g. `openssl rand -hex 32`); set the same value in both wp-config.php and the Zapier Zap |
+
+### Example wp-config.php block
+
+```php
+// Arc QB Sync — Quickbase integration
+define( 'QB_REALM_HOST',           'otac.quickbase.com' );
+define( 'QB_TABLE_ID',             'bc7mmze9k' );   // Events table
+define( 'QB_USER_TOKEN',           'your-token-here' );
+define( 'QB_COURSES_TABLE_ID',     'bc7mmze9m' );   // Course Catalog table
+define( 'ARC_QB_CACHE_BUST_TOKEN', 'your-random-secret-here' );
+```
+
+---
+
+## First Install Steps
+
+1. **Build the zip:** From the repo root, run `./build.sh`. This creates `arc-qb-sync.zip`.
+2. **Add wp-config.php constants:** Add all 5 constants above to `wp-config.php` on the live server before activating.
+3. **Deactivate the old plugin:** In WP Admin → Plugins, deactivate *Quickbase Event Management Sync for The Arc Oregon* (`arc-training-details`).
+4. **Upload and activate the new plugin:** WP Admin → Plugins → Add New → Upload Plugin → choose `arc-qb-sync.zip` → Install Now → Activate.
+5. **Do not delete the old plugin yet** — keep it deactivated until the new plugin is verified.
+
+---
+
+## Verifying the Events Module
+
+Load any existing training-details URL that was working before:
+
+```
+https://thearcoregon.org/training-details/?event-id=NNNN
+```
+
+All shortcode fields (`[event_title]`, `[event_dates]`, `[venue_name]`, etc.) should render as before. The Elementor trainer loop should also still work.
+
+---
+
+## Verifying the Courses Module
+
+1. In Quickbase, find a Course Catalog record with **Public Listing** (field 36) set to `true` and note its Record ID.
+2. Load:
+   ```
+   https://thearcoregon.org/course-catalog/?course-id=NNNN
+   ```
+   Shortcodes like `[course_title]`, `[course_short_description]`, `[course_tags]` should render.
+3. Load the `/training` page (which should contain `[course_catalog]`). Publicly listed courses should appear in the filterable grid.
+
+---
+
+## Cache Invalidation
+
+The course catalog is cached for 15 minutes via WP Transients. To manually clear the cache:
+
+```bash
+curl -X POST https://thearcoregon.org/wp-json/arc-qb-sync/v1/bust-cache \
+  -H "Authorization: Bearer YOUR_CACHE_BUST_TOKEN"
+```
+
+For automated cache clearing via Quickbase webhook + Zapier, see `docs/webhook-zapier.md`.
