@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(chmod +x \"C:\\\\Users\\\\alytle\\\\OneDrive - The Arc Oregon\\\\GitHub\\\\arc-training-details\\\\.claude\\\\worktrees\\\\busy-cannon\\\\build.sh\")",
+      "Bash(gh pr create --title 'Add arc-qb-sync plugin v1.0.0' --body ':*)",
+      "Bash(where gh:*)",
+      "Bash(winget list:*)"
+    ]
+  }
+}
