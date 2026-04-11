@@ -1,14 +1,17 @@
 <?php
 /**
- * Course CPT support: taxonomy registration and legacy URL redirect.
+ * Course CPT support: CPT registration, taxonomy registration, and legacy URL redirect.
  *
- * The `course` Custom Post Type itself is registered by ACF — this file does
- * not re-register it. Two responsibilities live here:
+ * Three responsibilities live here:
  *
- *  1. Register the `course_tag` taxonomy (unless you have already done this
+ *  1. Register the `course` Custom Post Type.
+ *     NOTE: If ACF is currently registering this CPT via its post types UI,
+ *     you must remove the ACF registration before activating this code.
+ *
+ *  2. Register the `course_tag` taxonomy (unless you have already done this
  *     via ACF's "Create taxonomy" UI — don't register it in both places).
  *
- *  2. Redirect legacy `/course-catalog/?course-id=nnnn` URLs to the correct
+ *  3. Redirect legacy `/course-catalog/?course-id=nnnn` URLs to the correct
  *     CPT permalink via a 301, preserving any bookmarked or shared links.
  */
 
@@ -16,7 +19,44 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-// ── 1. Register course_tag taxonomy ──────────────────────────────────────────
+// ── 1. Register course CPT ────────────────────────────────────────────────────
+
+add_action( 'init', 'arc_qb_register_course_cpt' );
+
+/**
+ * Register the `course` Custom Post Type.
+ *
+ * NOTE: If ACF is currently registering this CPT via its post types UI,
+ * you must remove the ACF registration before activating this code.
+ * Registering the same post type twice will cause a PHP notice and
+ * unpredictable behavior.
+ */
+function arc_qb_register_course_cpt() {
+	register_post_type(
+		'course',
+		array(
+			'label'               => 'Courses',
+			'labels'              => array(
+				'name'               => 'Courses',
+				'singular_name'      => 'Course',
+				'add_new_item'       => 'Add New Course',
+				'edit_item'          => 'Edit Course',
+				'view_item'          => 'View Course',
+				'search_items'       => 'Search Courses',
+				'not_found'          => 'No courses found.',
+				'not_found_in_trash' => 'No courses found in trash.',
+			),
+			'public'              => true,
+			'show_in_rest'        => true,
+			'supports'            => array( 'title', 'editor', 'thumbnail', 'excerpt', 'custom-fields' ),
+			'has_archive'         => false,
+			'rewrite'             => array( 'slug' => 'course' ),
+			'menu_icon'           => 'dashicons-welcome-learn-more',
+		)
+	);
+}
+
+// ── 2. Register course_tag taxonomy ──────────────────────────────────────────
 
 add_action( 'init', 'arc_qb_register_course_tag_taxonomy' );
 
