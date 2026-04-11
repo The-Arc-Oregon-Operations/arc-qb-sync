@@ -174,13 +174,39 @@ function arc_qb_sc_course_tags() {
 	return $output;
 }
 
-/* Featured Image URL */
+/* Featured Image URL (legacy — FID 88) */
 function arc_qb_sc_course_image_url() {
 	$post_id = arc_qb_get_course_post_id();
 	if ( ! $post_id ) {
 		return '';
 	}
 	$url = get_post_meta( $post_id, '_arc_course_image_url', true );
+	if ( empty( $url ) ) {
+		return '';
+	}
+	return esc_url( $url );
+}
+
+/* Featured Image URL lookup (ARC_QB_COURSE_FEATURED_IMAGE_FID) */
+function arc_qb_sc_course_featured_image_url() {
+	$post_id = arc_qb_get_course_post_id();
+	if ( ! $post_id ) {
+		return '';
+	}
+	$url = get_post_meta( $post_id, '_arc_course_featured_image_url', true );
+	if ( empty( $url ) ) {
+		return '';
+	}
+	return esc_url( $url );
+}
+
+/* Hero Image URL lookup (ARC_QB_COURSE_HERO_IMAGE_FID) */
+function arc_qb_sc_course_hero_image_url() {
+	$post_id = arc_qb_get_course_post_id();
+	if ( ! $post_id ) {
+		return '';
+	}
+	$url = get_post_meta( $post_id, '_arc_course_hero_image_url', true );
 	if ( empty( $url ) ) {
 		return '';
 	}
@@ -410,6 +436,8 @@ function arc_qb_register_course_shortcodes() {
 	add_shortcode( 'course_hours',                'arc_qb_sc_course_hours' );
 	add_shortcode( 'course_tags',                 'arc_qb_sc_course_tags' );
 	add_shortcode( 'course_image_url',            'arc_qb_sc_course_image_url' );
+	add_shortcode( 'course_featured_image_url',   'arc_qb_sc_course_featured_image_url' );
+	add_shortcode( 'course_hero_image_url',        'arc_qb_sc_course_hero_image_url' );
 	add_shortcode( 'course_delivery_method',      'arc_qb_sc_course_delivery_method' );
 	add_shortcode( 'course_target_audience',      'arc_qb_sc_course_target_audience' );
 	add_shortcode( 'course_category',             'arc_qb_sc_course_category' );

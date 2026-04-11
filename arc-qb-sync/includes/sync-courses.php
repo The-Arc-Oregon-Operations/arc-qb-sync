@@ -55,9 +55,18 @@ function arc_qb_fetch_course_record( $record_id ) {
 		);
 	}
 
+	$select = array( 3, 6, 14, 20, 36, 39, 40, 43, 46, 50, 56, 62, 84, 85, 88, 89, 90, 92 );
+
+	if ( defined( 'ARC_QB_COURSE_FEATURED_IMAGE_FID' ) && ARC_QB_COURSE_FEATURED_IMAGE_FID > 0 ) {
+		$select[] = ARC_QB_COURSE_FEATURED_IMAGE_FID;
+	}
+	if ( defined( 'ARC_QB_COURSE_HERO_IMAGE_FID' ) && ARC_QB_COURSE_HERO_IMAGE_FID > 0 ) {
+		$select[] = ARC_QB_COURSE_HERO_IMAGE_FID;
+	}
+
 	$body = array(
 		'from'   => QB_COURSES_TABLE_ID,
-		'select' => array( 3, 6, 14, 20, 36, 39, 40, 43, 46, 50, 56, 62, 84, 85, 88, 89, 90, 92 ),
+		'select' => $select,
 		'where'  => sprintf( '{3.EX.%d}', intval( $record_id ) ),
 		'options' => array( 'top' => 1 ),
 	);
@@ -97,9 +106,18 @@ function arc_qb_fetch_all_course_records() {
 		);
 	}
 
+	$select = array( 3, 6, 14, 20, 36, 39, 40, 43, 46, 50, 56, 62, 84, 85, 88, 89, 90, 92 );
+
+	if ( defined( 'ARC_QB_COURSE_FEATURED_IMAGE_FID' ) && ARC_QB_COURSE_FEATURED_IMAGE_FID > 0 ) {
+		$select[] = ARC_QB_COURSE_FEATURED_IMAGE_FID;
+	}
+	if ( defined( 'ARC_QB_COURSE_HERO_IMAGE_FID' ) && ARC_QB_COURSE_HERO_IMAGE_FID > 0 ) {
+		$select[] = ARC_QB_COURSE_HERO_IMAGE_FID;
+	}
+
 	$body = array(
 		'from'   => QB_COURSES_TABLE_ID,
-		'select' => array( 3, 6, 14, 20, 36, 39, 40, 43, 46, 50, 56, 62, 84, 85, 88, 89, 90, 92 ),
+		'select' => $select,
 		'where'  => '{36.EX.true}',
 		'sortBy' => array(
 			array(
@@ -218,6 +236,16 @@ function arc_qb_upsert_course( array $record ) {
 	update_post_meta( $post_id, '_arc_course_learning_objectives_html', wp_kses_post( arc_qb_get_course_field( $record, 62 ) ) );
 	update_post_meta( $post_id, '_arc_course_learning_objectives',      wp_kses_post( arc_qb_get_course_field( $record, 85 ) ) );
 	update_post_meta( $post_id, '_arc_course_image_url',                esc_url_raw( arc_qb_get_course_field( $record, 88 ) ) );
+
+	// Image Asset lookup fields (FIDs defined in wp-config.php after QB Build Spec v3.0)
+	if ( defined( 'ARC_QB_COURSE_FEATURED_IMAGE_FID' ) && ARC_QB_COURSE_FEATURED_IMAGE_FID > 0 ) {
+		update_post_meta( $post_id, '_arc_course_featured_image_url',
+			esc_url_raw( arc_qb_get_course_field( $record, ARC_QB_COURSE_FEATURED_IMAGE_FID ) ) );
+	}
+	if ( defined( 'ARC_QB_COURSE_HERO_IMAGE_FID' ) && ARC_QB_COURSE_HERO_IMAGE_FID > 0 ) {
+		update_post_meta( $post_id, '_arc_course_hero_image_url',
+			esc_url_raw( arc_qb_get_course_field( $record, ARC_QB_COURSE_HERO_IMAGE_FID ) ) );
+	}
 
 	// FID 20 — Length Num (numeric hours value)
 	update_post_meta( $post_id, '_arc_course_hours', sanitize_text_field( arc_qb_get_course_field( $record, 20 ) ) );

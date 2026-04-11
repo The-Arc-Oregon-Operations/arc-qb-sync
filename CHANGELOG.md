@@ -1,5 +1,28 @@
 # Changelog
 
+## [3.0.0] — 2026-04-11
+
+### Added
+- Events CPT (`arc_event`): full sync engine, admin page, ghost removal, `[arc_event_*]` shortcodes reading WP post meta
+- Instructors CPT (`instructor`): full sync engine, admin page, ghost removal, `[arc_instructor_*]` shortcodes
+- Legacy URL redirect for Events: `?event-id=NNNN` → CPT permalink (301)
+- Image Asset lookup field sync for Courses: `_arc_course_featured_image_url`, `_arc_course_hero_image_url`
+- Image Asset lookup field sync for Events: `_arc_event_featured_image_url`, `_arc_event_hero_image_url`
+- Image Asset lookup field sync for Instructors: `_arc_instructor_headshot_url` (headshot only; header image deferred)
+- New course shortcodes: `[course_featured_image_url]`, `[course_hero_image_url]`
+- `Arc Event Sync` and `Arc Instructor Sync` admin pages under WP Settings
+- New wp-config.php constants: `QB_INSTRUCTORS_TABLE_ID`, `ARC_QB_COURSE_FEATURED_IMAGE_FID`, `ARC_QB_COURSE_HERO_IMAGE_FID`, `ARC_QB_EVENT_FEATURED_IMAGE_FID`, `ARC_QB_EVENT_HERO_IMAGE_FID`, `ARC_QB_INSTRUCTOR_PROFILE_FID`, `ARC_QB_EVENT_INSTRUCTOR1_NAME_FID`, `ARC_QB_EVENT_INSTRUCTOR1_HEADSHOT_FID`, `ARC_QB_EVENT_INSTRUCTOR1_HEADSHOT_ALT_FID`, `ARC_QB_EVENT_INSTRUCTOR2_NAME_FID`, `ARC_QB_EVENT_INSTRUCTOR2_HEADSHOT_FID`, `ARC_QB_EVENT_INSTRUCTOR2_HEADSHOT_ALT_FID`, `ARC_QB_EVENT_INSTRUCTOR3_NAME_FID`, `ARC_QB_EVENT_INSTRUCTOR3_HEADSHOT_FID`, `ARC_QB_EVENT_INSTRUCTOR3_HEADSHOT_ALT_FID`
+
+### Changed
+- Course CPT (`course`) registration migrated from ACF to plugin (`cpt-courses.php`)
+  ⚠️ Requires removing ACF CPT registration before activating — see docs/setup.md
+- Plugin version: 3.0.0
+
+### Preserved (no breaking changes)
+- All existing event shortcodes (`event_*`, deprecated aliases) unchanged — live pages not affected
+- Existing `trainer` CPT unchanged — Elementor trainer loops continue working
+- Existing `arc_training_field` / `event_field` generic shortcodes unchanged
+
 ## [2.2.0] — 2026-04-11
 
 ### Added
