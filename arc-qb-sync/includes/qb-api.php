@@ -58,3 +58,61 @@ function arc_qb_request( array $body ) {
 
 	return $data['data'];
 }
+
+// ── Course field helpers ───────────────────────────────────────────────────────
+// Moved here from courses.php in v2.2.0. sync-courses.php and
+// shortcodes-courses.php both call these; qb-api.php is loaded first.
+
+/**
+ * Extract a single field's value from a course record array.
+ *
+ * @param array $record    A single QB record array (keyed by field ID string).
+ * @param int   $field_id  Quickbase field ID.
+ * @return string
+ */
+function arc_qb_get_course_field( $record, $field_id ) {
+	$key = (string) $field_id;
+	if ( isset( $record[ $key ]['value'] ) ) {
+		return $record[ $key ]['value'];
+	}
+	return '';
+}
+
+/**
+ * Parse the Keywords / Tags field value into a clean array of tag strings.
+ *
+ * QB field 56 (Keywords / Tags) returns a PHP array via the REST API.
+ * Falls back to newline-splitting for plain string values.
+ *
+ * @param mixed $raw  Raw value from QB field 56 (array or string).
+ * @return string[]   Array of trimmed, non-empty tag strings.
+ */
+function arc_qb_parse_tags( $raw ) {
+	if ( is_array( $raw ) ) {
+		return array_values( array_filter( array_map( 'trim', $raw ) ) );
+	}
+	$tags = array_filter(
+		array_map( 'trim', explode( "\n", (string) $raw ) )
+	);
+	return array_values( $tags );
+}
+
+/**
+ * Format a Quickbase Duration field value (milliseconds) as a human-readable
+ * hours string, e.g. 23400000 → "6.5 hours".
+ *
+ * @param mixed $ms  Raw QB duration value in milliseconds.
+ * @return string    Formatted string, e.g. "6.5 hours" or "2 hours".
+ */
+function arc_qb_format_duration( $ms ) {
+	if ( ! is_numeric( $ms ) || intval( $ms ) <= 0 ) {
+		return esc_html( (string) $ms );
+	}
+	$hours = intval( $ms ) / 3600000;
+	if ( $hours === floor( $hours ) ) {
+		$formatted = number_format( (int) $hours ) . ' hours';
+	} else {
+		$formatted = rtrim( rtrim( number_format( $hours, 1 ), '0' ), '.' ) . ' hours';
+	}
+	return $formatted;
+}
