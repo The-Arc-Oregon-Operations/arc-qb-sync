@@ -1,32 +1,42 @@
 <?php
 /**
- * REST endpoint for cache invalidation.
+ * REST endpoint for incremental course sync.
  *
- * Route: POST /wp-json/arc-qb-sync/v1/bust-cache
+ * Route: POST /wp-json/arc-qb-sync/v1/sync-course
  *
  * Called by Zapier when a Course Catalog record is saved in Quickbase.
  * Requires Authorization: Bearer [ARC_QB_CACHE_BUST_TOKEN] header.
+ * Body: {"record_id": 12345}
  *
- * See docs/webhook-zapier.md for setup instructions.
+ * The endpoint fetches that single record from QB and upserts it into WP.
+ *
+ * Zapier action (Webhooks by Zapier — POST):
+ *   URL:     https://thearcoregon.org/wp-json/arc-qb-sync/v1/sync-course
+ *   Headers: Authorization: Bearer [ARC_QB_CACHE_BUST_TOKEN value]
+ *   Body:    {"record_id": "{{3}}"}
+ *
+ * Note: Confirm that the QB webhook payload includes field values and that
+ * Record ID# (field 3) is accessible as {{3}} in Zapier's data mapper.
+ * If not, add an intermediate QB lookup step before the WP POST action.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-add_action( 'rest_api_init', 'arc_qb_register_cache_bust_route' );
+add_action( 'rest_api_init', 'arc_qb_register_sync_course_route' );
 
 /**
- * Register the cache bust REST route.
+ * Register the sync-course REST route.
  */
-function arc_qb_register_cache_bust_route() {
+function arc_qb_register_sync_course_route() {
 	register_rest_route(
 		'arc-qb-sync/v1',
-		'/bust-cache',
+		'/sync-course',
 		array(
 			'methods'             => 'POST',
-			'callback'            => 'arc_qb_handle_cache_bust',
-			'permission_callback' => 'arc_qb_cache_bust_permission',
+			'callback'            => 'arc_qb_handle_sync_course',
+			'permission_callback' => 'arc_qb_sync_course_permission',
 		)
 	);
 }
@@ -34,14 +44,14 @@ function arc_qb_register_cache_bust_route() {
 /**
  * Permission callback: validate Bearer token in Authorization header.
  *
- * @param \WP_REST_Request $request
+ * @param  \WP_REST_Request $request
  * @return true|\WP_Error
  */
-function arc_qb_cache_bust_permission( $request ) {
+function arc_qb_sync_course_permission( $request ) {
 	if ( ! defined( 'ARC_QB_CACHE_BUST_TOKEN' ) ) {
 		return new WP_Error(
 			'arc_qb_auth_not_configured',
-			'Cache bust endpoint is not configured.',
+			'Sync endpoint is not configured.',
 			array( 'status' => 401 )
 		);
 	}
@@ -61,17 +71,49 @@ function arc_qb_cache_bust_permission( $request ) {
 }
 
 /**
- * Callback: delete the course catalog transient and return success.
+ * Callback: fetch the specified QB record and upsert it into WordPress.
  *
- * @return \WP_REST_Response
+ * @param  \WP_REST_Request $request
+ * @return \WP_REST_Response|\WP_Error
  */
-function arc_qb_handle_cache_bust() {
-	delete_transient( 'arc_qb_public_courses' );
+function arc_qb_handle_sync_course( $request ) {
+	$body      = $request->get_json_params();
+	$record_id = isset( $body['record_id'] ) ? intval( $body['record_id'] ) : 0;
+
+	if ( $record_id <= 0 ) {
+		return new WP_Error(
+			'arc_qb_missing_record_id',
+			'Missing or invalid record_id in request body.',
+			array( 'status' => 400 )
+		);
+	}
+
+	// Fetch the single QB record.
+	$record = arc_qb_fetch_course_record( $record_id );
+
+	if ( is_wp_error( $record ) ) {
+		return new WP_Error(
+			'arc_qb_fetch_failed',
+			$record->get_error_message(),
+			array( 'status' => 502 )
+		);
+	}
+
+	// Upsert into WordPress.
+	$post_id = arc_qb_upsert_course( $record );
+
+	if ( is_wp_error( $post_id ) ) {
+		return new WP_Error(
+			'arc_qb_upsert_failed',
+			$post_id->get_error_message(),
+			array( 'status' => 500 )
+		);
+	}
 
 	return rest_ensure_response(
 		array(
 			'success' => true,
-			'message' => 'Cache cleared.',
+			'post_id' => $post_id,
 		)
 	);
 }
