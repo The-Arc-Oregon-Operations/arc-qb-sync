@@ -12,21 +12,27 @@
  *  - WP Admin settings page with "Sync All Courses Now" button
  *  - [arc_course_filter_pills] shortcode
  *
- * QB field mapping (Section 2 of v2 spec):
+ * QB field mapping (v2.2.0):
  *   3  → _arc_qb_record_id (sync key) + post lookup
  *   6  → post_title
- *   7  → _arc_course_description_fallback
  *   14 → _arc_course_length_ms (raw ms) + _arc_course_length (formatted)
+ *   20 → _arc_course_hours (numeric hours)
  *   36 → post_status: publish (TRUE) / draft (FALSE)
- *   39 → _arc_course_payment
+ *   39 → _arc_course_base_rate
  *   40 → _arc_course_delivery_method
  *   43 → _arc_course_category
  *   46 → post_excerpt
  *   50 → _arc_course_target_audience
  *   56 → course_tag taxonomy terms + _course_tag_slugs (comma-separated slugs)
  *   62 → _arc_course_learning_objectives_html (primary display field)
+ *   84 → _arc_course_details_url
  *   85 → _arc_course_learning_objectives (secondary)
  *   88 → _arc_course_image_url
+ *   89 → _arc_course_attribution
+ *        Note: FID 89 in the Events table is "Event Time" — separate table,
+ *        independent FID numbering.
+ *   90 → _arc_course_use_attribution (checkbox — stored as "1" or "0")
+ *   92 → _arc_course_slug → also post_name
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -51,7 +57,7 @@ function arc_qb_fetch_course_record( $record_id ) {
 
 	$body = array(
 		'from'   => QB_COURSES_TABLE_ID,
-		'select' => array( 3, 6, 7, 14, 36, 39, 40, 43, 46, 50, 56, 62, 85, 88 ),
+		'select' => array( 3, 6, 14, 20, 36, 39, 40, 43, 46, 50, 56, 62, 84, 85, 88, 89, 90, 92 ),
 		'where'  => sprintf( '{3.EX.%d}', intval( $record_id ) ),
 		'options' => array( 'top' => 1 ),
 	);
@@ -93,7 +99,7 @@ function arc_qb_fetch_all_course_records() {
 
 	$body = array(
 		'from'   => QB_COURSES_TABLE_ID,
-		'select' => array( 3, 6, 7, 14, 36, 39, 40, 43, 46, 50, 56, 62, 85, 88 ),
+		'select' => array( 3, 6, 14, 20, 36, 39, 40, 43, 46, 50, 56, 62, 84, 85, 88, 89, 90, 92 ),
 		'where'  => '{36.EX.true}',
 		'sortBy' => array(
 			array(
@@ -132,6 +138,9 @@ function arc_qb_upsert_course( array $record ) {
 	$excerpt       = arc_qb_get_course_field( $record, 46 );
 	$public_raw    = arc_qb_get_course_field( $record, 36 );
 	$length_ms_raw = arc_qb_get_course_field( $record, 14 );
+
+	// FID 92 — Slug for Website drives post_name.
+	$course_slug = sanitize_title( arc_qb_get_course_field( $record, 92 ) );
 
 	// Determine whether this course is publicly listed.
 	// QB booleans come back as PHP true/false after JSON decode, but may also
@@ -181,6 +190,7 @@ function arc_qb_upsert_course( array $record ) {
 		'post_title'   => sanitize_text_field( $title ),
 		'post_excerpt' => wp_kses_post( $excerpt ),
 		'post_status'  => 'publish',
+		'post_name'    => $course_slug,
 	);
 
 	if ( $post_id > 0 ) {
@@ -199,16 +209,32 @@ function arc_qb_upsert_course( array $record ) {
 	// ── Update post meta ──────────────────────────────────────────────────────
 
 	update_post_meta( $post_id, '_arc_qb_record_id',                    $qb_record_id );
-	update_post_meta( $post_id, '_arc_course_description_fallback',     wp_kses_post( arc_qb_get_course_field( $record, 7 ) ) );
 	update_post_meta( $post_id, '_arc_course_length_ms',                $length_ms_raw );
 	update_post_meta( $post_id, '_arc_course_length',                   arc_qb_format_duration( $length_ms_raw ) );
-	update_post_meta( $post_id, '_arc_course_payment',                  sanitize_text_field( arc_qb_get_course_field( $record, 39 ) ) );
+	update_post_meta( $post_id, '_arc_course_base_rate',                sanitize_text_field( arc_qb_get_course_field( $record, 39 ) ) );
 	update_post_meta( $post_id, '_arc_course_delivery_method',          sanitize_text_field( arc_qb_get_course_field( $record, 40 ) ) );
 	update_post_meta( $post_id, '_arc_course_category',                 sanitize_text_field( arc_qb_get_course_field( $record, 43 ) ) );
 	update_post_meta( $post_id, '_arc_course_target_audience',          wp_kses_post( arc_qb_get_course_field( $record, 50 ) ) );
 	update_post_meta( $post_id, '_arc_course_learning_objectives_html', wp_kses_post( arc_qb_get_course_field( $record, 62 ) ) );
 	update_post_meta( $post_id, '_arc_course_learning_objectives',      wp_kses_post( arc_qb_get_course_field( $record, 85 ) ) );
 	update_post_meta( $post_id, '_arc_course_image_url',                esc_url_raw( arc_qb_get_course_field( $record, 88 ) ) );
+
+	// FID 20 — Length Num (numeric hours value)
+	update_post_meta( $post_id, '_arc_course_hours', sanitize_text_field( arc_qb_get_course_field( $record, 20 ) ) );
+
+	// FID 84 — Link to Course Overview Page
+	update_post_meta( $post_id, '_arc_course_details_url', esc_url_raw( arc_qb_get_course_field( $record, 84 ) ) );
+
+	// FID 89 — Attribution
+	// Note: FID 89 in the Events table is "Event Time" — separate table, independent FID numbering.
+	update_post_meta( $post_id, '_arc_course_attribution', sanitize_text_field( arc_qb_get_course_field( $record, 89 ) ) );
+
+	// FID 90 — Use Attribution (checkbox)
+	$use_attribution = arc_qb_get_course_field( $record, 90 );
+	update_post_meta( $post_id, '_arc_course_use_attribution', ( $use_attribution && 'false' !== strtolower( (string) $use_attribution ) ) ? '1' : '0' );
+
+	// FID 92 — Slug for Website (also drives post_name — see $post_data above)
+	update_post_meta( $post_id, '_arc_course_slug', $course_slug );
 
 	// ── Sync tags ─────────────────────────────────────────────────────────────
 
@@ -230,7 +256,13 @@ function arc_qb_upsert_course( array $record ) {
 /**
  * Fetch all QB Course Catalog records and upsert each one into WordPress.
  *
- * Returns an associative array with 'synced', 'errors', and 'messages' keys.
+ * After upserting, runs a ghost-removal pass: any published course post whose
+ * QB record ID was not returned by the sync query is demoted to draft. This
+ * handles courses that were deleted or unchecked in QB between syncs.
+ * Posts are never deleted — only drafted.
+ *
+ * Returns an associative array with 'synced', 'errors', 'ghosted', and
+ * 'messages' keys.
  *
  * @return array  Results summary.
  */
@@ -241,15 +273,23 @@ function arc_qb_sync_all_courses() {
 		return array(
 			'synced'   => 0,
 			'errors'   => 1,
+			'ghosted'  => 0,
 			'messages' => array( $records->get_error_message() ),
 		);
 	}
 
-	$synced   = 0;
-	$errors   = 0;
-	$messages = array();
+	$synced     = 0;
+	$errors     = 0;
+	$messages   = array();
+	$synced_ids = array();
 
 	foreach ( $records as $record ) {
+		// Collect synced QB record IDs for ghost-removal pass below.
+		$qb_id = intval( arc_qb_get_course_field( $record, 3 ) );
+		if ( $qb_id > 0 ) {
+			$synced_ids[] = $qb_id;
+		}
+
 		$result = arc_qb_upsert_course( $record );
 		if ( is_wp_error( $result ) ) {
 			$errors++;
@@ -259,9 +299,35 @@ function arc_qb_sync_all_courses() {
 		}
 	}
 
+	// ── Ghost removal ─────────────────────────────────────────────────────────
+	// Draft any published course posts not returned by this sync.
+	// These are courses that no longer appear in QB's public listing
+	// (deleted or unpublished). We draft rather than delete to preserve
+	// content history.
+	$ghosted = 0;
+	$published_courses = get_posts( array(
+		'post_type'      => 'course',
+		'post_status'    => 'publish',
+		'numberposts'    => -1,
+		'meta_key'       => '_arc_qb_record_id',
+		'fields'         => 'ids',
+	) );
+
+	foreach ( $published_courses as $wp_post_id ) {
+		$post_qb_id = intval( get_post_meta( $wp_post_id, '_arc_qb_record_id', true ) );
+		if ( $post_qb_id > 0 && ! in_array( $post_qb_id, $synced_ids, true ) ) {
+			wp_update_post( array(
+				'ID'          => $wp_post_id,
+				'post_status' => 'draft',
+			) );
+			$ghosted++;
+		}
+	}
+
 	return array(
 		'synced'   => $synced,
 		'errors'   => $errors,
+		'ghosted'  => $ghosted,
 		'messages' => $messages,
 	);
 }
@@ -308,11 +374,17 @@ function arc_qb_render_sync_settings_page() {
 		<?php if ( null !== $sync_result ) : ?>
 			<?php if ( 0 === $sync_result['errors'] ) : ?>
 				<div class="notice notice-success is-dismissible">
-					<p><?php printf( esc_html__( 'Sync complete. %d courses synced.', 'arc-qb-sync' ), $sync_result['synced'] ); ?></p>
+					<p><?php
+						printf(
+							esc_html__( 'Sync complete. %d courses synced, %d drafted (removed from QB public listing).', 'arc-qb-sync' ),
+							$sync_result['synced'],
+							$sync_result['ghosted']
+						);
+					?></p>
 				</div>
 			<?php else : ?>
 				<div class="notice notice-error is-dismissible">
-					<p><?php printf( esc_html__( 'Sync finished with errors. %d synced, %d errors.', 'arc-qb-sync' ), $sync_result['synced'], $sync_result['errors'] ); ?></p>
+					<p><?php printf( esc_html__( 'Sync finished with errors. %d synced, %d errors, %d drafted.', 'arc-qb-sync' ), $sync_result['synced'], $sync_result['errors'], $sync_result['ghosted'] ); ?></p>
 					<?php if ( ! empty( $sync_result['messages'] ) ) : ?>
 						<ul>
 							<?php foreach ( $sync_result['messages'] as $msg ) : ?>
