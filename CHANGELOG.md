@@ -1,5 +1,10 @@
 # Changelog
 
+## [3.1.1] — 2026-04-11
+
+### Fixed
+- Legacy `?event-id=NNNN` redirect disabled — `add_action` hook commented out in `cpt-events.php`. Was firing unconditionally once Event Sync populated the `arc_event` CPT, breaking existing `/training-details/` pages. Uncomment to restore when ready to cut over.
+
 ## [3.1.0] — 2026-04-11
 
 ### Changed
@@ -52,37 +57,4 @@
 - Loop context shortcode: `arc_trainer_title` → `loop_trainer_title` (old name kept as alias)
 
 ### Removed
-- `shortcodes-catalog.php` — deprecated no-op since v2.0; removed
-- FID 7 (Description + Learning Objectives) removed from sync; FID 85 (Learning Objectives - HTML) is the authoritative source
-
-### Fixed
-- Helper functions `arc_qb_get_course_field()`, `arc_qb_parse_tags()`, `arc_qb_format_duration()` moved from `courses.php` to `qb-api.php`
-- `docs/webhook-zapier.md` updated to document current `/sync-course` endpoint (replaces obsolete `/bust-cache` documentation)
-
-## [2.1.0] — 2026-04-09
-
-(See prior session notes — no CHANGELOG entry was written at the time.)
-
-## [1.0.0] — 2026-04-08
-
-### Changed
-- Plugin renamed from `arc-training-details` to `arc-qb-sync`
-- Restructured from single-file to modular include-based architecture
-- Shared QB API request logic extracted to `includes/qb-api.php`
-
-### Added
-- Courses module: single course detail page support via `?course-id=nnnn`
-- Course Catalog module: `[course_catalog]` shortcode with filterable grid
-- WP Transient caching for the course catalog (15-minute TTL)
-- REST endpoint `POST /wp-json/arc-qb-sync/v1/bust-cache` for cache invalidation
-- Client-side tag filter (course-catalog.js)
-- `build.sh` packaging script
-- `docs/` folder with setup, field mapping, and webhook documentation
-
-### Preserved (no breaking changes)
-- All v0.4.0 shortcode names and behavior unchanged
-- Elementor trainer query hook unchanged
-
-## [0.4.0] — prior
-
-See legacy plugin file (`arc-training-details/arc-training-details.php`) for history.
+- `shortcodes-catalog.php` — deprecated no-op since
