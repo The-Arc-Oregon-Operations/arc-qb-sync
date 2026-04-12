@@ -1,5 +1,19 @@
 # Changelog
 
+## [3.2.0] — 2026-04-12
+
+### Changed
+- `event_*` shortcode names are now the primary CPT event shortcodes (previously `arc_event_*`)
+- `arc_event_*` names remain registered as deprecated aliases — no breaking change for any templates already using them
+- `[event_flyer_url]` is the correct primary name for the flyer URL shortcode (the old legacy name `[event_flyer]` no longer exists in either branch)
+- `shortcodes-events-cpt.php`: added `arc_qb_get_event_post_id()` context resolver — CPT event shortcodes now work on both native CPT pages and legacy `?event-id=` pages during the transition period
+- `shortcodes-events.php`: removed all `event_*` shortcode registrations; legacy QB-fetch functions preserved but deregistered; pre-v2.2.0 aliases (`venue_name`, `instructors`, etc.) unchanged
+
+### Fixed
+- CPT event shortcodes previously used bare `get_the_ID()` with no fallback; they now use the context resolver and work correctly on legacy URL-pattern pages
+
+---
+
 <<<<<<< Updated upstream
 ## [3.1.2] — 2026-04-12
 
