@@ -23,7 +23,7 @@
  *   ARC_QB_INSTRUCTOR_FID_BIO          (11) → _arc_instructor_bio
  *   ARC_QB_INSTRUCTOR_FID_TITLE        (12) → _arc_instructor_title
  *   ARC_QB_INSTRUCTOR_FID_ORGANIZATION (13) → _arc_instructor_organization
- *   ARC_QB_INSTRUCTOR_PROFILE_FID      (15) → _arc_instructor_headshot_url
+ *   15 → _arc_instructor_headshot_url
  *   ARC_QB_INSTRUCTOR_FID_SLUG         (27) → _arc_instructor_slug + post_name
  *   ARC_QB_INSTRUCTOR_FID_ACTIVE       (28) → post_status: publish (TRUE) / draft (FALSE)
  */
@@ -46,7 +46,7 @@ if ( ! defined( 'ARC_QB_INSTRUCTOR_FID_TITLE' ) )        define( 'ARC_QB_INSTRUC
 if ( ! defined( 'ARC_QB_INSTRUCTOR_FID_ORGANIZATION' ) ) define( 'ARC_QB_INSTRUCTOR_FID_ORGANIZATION', 13 ); // Organization
 if ( ! defined( 'ARC_QB_INSTRUCTOR_FID_SLUG' ) )         define( 'ARC_QB_INSTRUCTOR_FID_SLUG',         27 ); // slug (WP post slug)
 if ( ! defined( 'ARC_QB_INSTRUCTOR_FID_ACTIVE' ) )       define( 'ARC_QB_INSTRUCTOR_FID_ACTIVE',       28 ); // Active (checkbox — publish gate)
-// ARC_QB_INSTRUCTOR_PROFILE_FID (15) — Headshot URL lookup — defined in wp-config.php.
+// FID 15 — Headshot URL lookup (Image Assets table).
 
 // ── QB fetch helpers ──────────────────────────────────────────────────────────
 
@@ -74,7 +74,7 @@ function arc_qb_fetch_all_instructor_records() {
 		ARC_QB_INSTRUCTOR_FID_BIO,          // 11
 		ARC_QB_INSTRUCTOR_FID_TITLE,        // 12
 		ARC_QB_INSTRUCTOR_FID_ORGANIZATION, // 13
-		ARC_QB_INSTRUCTOR_PROFILE_FID,      // 15 — Headshot URL lookup
+		15,                                 // FID 15 — Headshot URL lookup
 		ARC_QB_INSTRUCTOR_FID_SLUG,         // 27
 		ARC_QB_INSTRUCTOR_FID_ACTIVE,       // 28
 	);
@@ -199,7 +199,7 @@ function arc_qb_upsert_instructor( array $record ) {
 	update_post_meta( $post_id, '_arc_instructor_organization',
 		sanitize_text_field( arc_qb_get_course_field( $record, ARC_QB_INSTRUCTOR_FID_ORGANIZATION ) ) );
 	update_post_meta( $post_id, '_arc_instructor_headshot_url',
-		esc_url_raw( arc_qb_get_course_field( $record, ARC_QB_INSTRUCTOR_PROFILE_FID ) ) );
+		esc_url_raw( arc_qb_get_course_field( $record, 15 ) ) );
 	update_post_meta( $post_id, '_arc_instructor_slug', $post_name );
 
 	return $post_id;
