@@ -62,17 +62,10 @@ function arc_qb_fetch_course_record( $record_id ) {
 		);
 	}
 
-<<<<<<< Updated upstream
-	$select = array( 3, 6, 14, 20, 36, 39, 40, 43, 46, 50, 56, 62, 84, 85, 88, 89, 90, 92 );
-
-	$select[] = 94; // Featured Image URL [lookup]
-	$select[] = 96; // Hero Image URL [lookup]
-=======
 	$select = array( 3, 6, 14, 20, 36, 39, 40, 43, 46, 50, 56, 62, 84, 85, 88, 89, 90, 92,
 		ARC_QB_COURSE_FEATURED_IMAGE_FID, // 94
 		ARC_QB_COURSE_HERO_IMAGE_FID,     // 96
 	);
->>>>>>> Stashed changes
 
 	$body = array(
 		'from'   => QB_COURSES_TABLE_ID,
@@ -116,17 +109,10 @@ function arc_qb_fetch_all_course_records() {
 		);
 	}
 
-<<<<<<< Updated upstream
-	$select = array( 3, 6, 14, 20, 36, 39, 40, 43, 46, 50, 56, 62, 84, 85, 88, 89, 90, 92 );
-
-	$select[] = 94; // Featured Image URL [lookup]
-	$select[] = 96; // Hero Image URL [lookup]
-=======
 	$select = array( 3, 6, 14, 20, 36, 39, 40, 43, 46, 50, 56, 62, 84, 85, 88, 89, 90, 92,
 		ARC_QB_COURSE_FEATURED_IMAGE_FID, // 94
 		ARC_QB_COURSE_HERO_IMAGE_FID,     // 96
 	);
->>>>>>> Stashed changes
 
 	$body = array(
 		'from'   => QB_COURSES_TABLE_ID,
@@ -250,19 +236,11 @@ function arc_qb_upsert_course( array $record ) {
 	update_post_meta( $post_id, '_arc_course_learning_objectives',      wp_kses_post( arc_qb_get_course_field( $record, 85 ) ) );
 	update_post_meta( $post_id, '_arc_course_image_url',                esc_url_raw( arc_qb_get_course_field( $record, 88 ) ) );
 
-<<<<<<< Updated upstream
-	// Image Asset lookup FIDs — hardcoded (stable QB schema).
-	update_post_meta( $post_id, '_arc_course_featured_image_url',
-		esc_url_raw( arc_qb_get_course_field( $record, 94 ) ) );
-	update_post_meta( $post_id, '_arc_course_hero_image_url',
-		esc_url_raw( arc_qb_get_course_field( $record, 96 ) ) );
-=======
 	// Image Asset lookup fields
 	update_post_meta( $post_id, '_arc_course_featured_image_url',
 		esc_url_raw( arc_qb_get_course_field( $record, ARC_QB_COURSE_FEATURED_IMAGE_FID ) ) ); // 94
 	update_post_meta( $post_id, '_arc_course_hero_image_url',
 		esc_url_raw( arc_qb_get_course_field( $record, ARC_QB_COURSE_HERO_IMAGE_FID ) ) );     // 96
->>>>>>> Stashed changes
 
 	// FID 20 — Length Num (numeric hours value)
 	update_post_meta( $post_id, '_arc_course_hours', sanitize_text_field( arc_qb_get_course_field( $record, 20 ) ) );
@@ -339,6 +317,7 @@ function arc_qb_sync_all_courses() {
 		if ( is_wp_error( $result ) ) {
 			$errors++;
 			$messages[] = $result->get_error_message();
+			error_log( '[arc-qb-sync] Course upsert failed for QB record ' . $qb_id . ': ' . $result->get_error_message() );
 		} else {
 			$synced++;
 		}

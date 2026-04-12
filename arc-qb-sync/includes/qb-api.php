@@ -49,7 +49,7 @@ function arc_qb_request( array $body ) {
 	$status = wp_remote_retrieve_response_code( $response );
 	$data   = json_decode( wp_remote_retrieve_body( $response ), true );
 
-	if ( 200 !== $status || empty( $data['data'] ) || ! is_array( $data['data'] ) ) {
+	if ( 200 !== $status || ! isset( $data['data'] ) || ! is_array( $data['data'] ) ) {
 		return new WP_Error(
 			'arc_qb_bad_response',
 			sprintf( 'Unexpected response from Quickbase (HTTP %d).', $status )
