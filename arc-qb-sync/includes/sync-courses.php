@@ -39,6 +39,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+// ── FID constants — Course image lookups ──────────────────────────────────────
+// These are permanent Quickbase field IDs specific to The Arc Oregon's QB app.
+// They belong in the plugin, not in wp-config.php.
+
+define( 'ARC_QB_COURSE_FEATURED_IMAGE_FID', 94 ); // Courses: Featured Image URL [lookup from Image Assets]
+define( 'ARC_QB_COURSE_HERO_IMAGE_FID',     96 ); // Courses: Hero Image URL [lookup from Image Assets]
+
 // ── QB fetch helpers ──────────────────────────────────────────────────────────
 
 /**
@@ -55,10 +62,17 @@ function arc_qb_fetch_course_record( $record_id ) {
 		);
 	}
 
+<<<<<<< Updated upstream
 	$select = array( 3, 6, 14, 20, 36, 39, 40, 43, 46, 50, 56, 62, 84, 85, 88, 89, 90, 92 );
 
 	$select[] = 94; // Featured Image URL [lookup]
 	$select[] = 96; // Hero Image URL [lookup]
+=======
+	$select = array( 3, 6, 14, 20, 36, 39, 40, 43, 46, 50, 56, 62, 84, 85, 88, 89, 90, 92,
+		ARC_QB_COURSE_FEATURED_IMAGE_FID, // 94
+		ARC_QB_COURSE_HERO_IMAGE_FID,     // 96
+	);
+>>>>>>> Stashed changes
 
 	$body = array(
 		'from'   => QB_COURSES_TABLE_ID,
@@ -102,10 +116,17 @@ function arc_qb_fetch_all_course_records() {
 		);
 	}
 
+<<<<<<< Updated upstream
 	$select = array( 3, 6, 14, 20, 36, 39, 40, 43, 46, 50, 56, 62, 84, 85, 88, 89, 90, 92 );
 
 	$select[] = 94; // Featured Image URL [lookup]
 	$select[] = 96; // Hero Image URL [lookup]
+=======
+	$select = array( 3, 6, 14, 20, 36, 39, 40, 43, 46, 50, 56, 62, 84, 85, 88, 89, 90, 92,
+		ARC_QB_COURSE_FEATURED_IMAGE_FID, // 94
+		ARC_QB_COURSE_HERO_IMAGE_FID,     // 96
+	);
+>>>>>>> Stashed changes
 
 	$body = array(
 		'from'   => QB_COURSES_TABLE_ID,
@@ -229,11 +250,19 @@ function arc_qb_upsert_course( array $record ) {
 	update_post_meta( $post_id, '_arc_course_learning_objectives',      wp_kses_post( arc_qb_get_course_field( $record, 85 ) ) );
 	update_post_meta( $post_id, '_arc_course_image_url',                esc_url_raw( arc_qb_get_course_field( $record, 88 ) ) );
 
+<<<<<<< Updated upstream
 	// Image Asset lookup FIDs — hardcoded (stable QB schema).
 	update_post_meta( $post_id, '_arc_course_featured_image_url',
 		esc_url_raw( arc_qb_get_course_field( $record, 94 ) ) );
 	update_post_meta( $post_id, '_arc_course_hero_image_url',
 		esc_url_raw( arc_qb_get_course_field( $record, 96 ) ) );
+=======
+	// Image Asset lookup fields
+	update_post_meta( $post_id, '_arc_course_featured_image_url',
+		esc_url_raw( arc_qb_get_course_field( $record, ARC_QB_COURSE_FEATURED_IMAGE_FID ) ) ); // 94
+	update_post_meta( $post_id, '_arc_course_hero_image_url',
+		esc_url_raw( arc_qb_get_course_field( $record, ARC_QB_COURSE_HERO_IMAGE_FID ) ) );     // 96
+>>>>>>> Stashed changes
 
 	// FID 20 — Length Num (numeric hours value)
 	update_post_meta( $post_id, '_arc_course_hours', sanitize_text_field( arc_qb_get_course_field( $record, 20 ) ) );
@@ -348,55 +377,139 @@ function arc_qb_sync_all_courses() {
 	);
 }
 
-// ── Admin settings page ───────────────────────────────────────────────────────
+// ── Admin page — Tools menu ───────────────────────────────────────────────────
 
-add_action( 'admin_menu', 'arc_qb_add_sync_settings_page' );
+add_action( 'admin_menu', 'arc_qb_add_course_sync_page' );
 
 /**
- * Register the Arc QB Sync settings page under WP Admin → Settings.
+ * Register the QB Course Sync page under WP Admin → Tools.
  */
-function arc_qb_add_sync_settings_page() {
-	add_options_page(
-		'Arc QB Sync',
-		'Arc QB Sync',
+function arc_qb_add_course_sync_page() {
+	add_management_page(
+		'QB Course Sync',
+		'QB Course Sync',
 		'manage_options',
-		'arc-qb-sync',
-		'arc_qb_render_sync_settings_page'
+		'arc-qb-course-sync',
+		'arc_qb_render_course_sync_page'
 	);
 }
 
 /**
- * Handle the "Sync All Courses Now" form POST and render the settings page.
+ * Preview what a full course sync would do — reads QB and WP, writes nothing.
+ *
+ * @return array|WP_Error  Keys: total, new, update, ghost. WP_Error on QB failure.
  */
-function arc_qb_render_sync_settings_page() {
+function arc_qb_preview_course_sync() {
+	$records = arc_qb_fetch_all_course_records();
+	if ( is_wp_error( $records ) ) {
+		return $records;
+	}
+
+	$qb_ids = array();
+	foreach ( $records as $record ) {
+		$id = intval( arc_qb_get_course_field( $record, 3 ) );
+		if ( $id > 0 ) {
+			$qb_ids[] = $id;
+		}
+	}
+
+	// Map existing WP course posts by QB record ID.
+	$existing_posts = get_posts( array(
+		'post_type'   => 'course',
+		'post_status' => array( 'publish', 'draft' ),
+		'numberposts' => -1,
+		'meta_key'    => '_arc_qb_record_id',
+		'fields'      => 'ids',
+	) );
+
+	$existing_qb_ids = array();
+	foreach ( $existing_posts as $post_id ) {
+		$qb_id = intval( get_post_meta( $post_id, '_arc_qb_record_id', true ) );
+		if ( $qb_id > 0 ) {
+			$existing_qb_ids[] = $qb_id;
+		}
+	}
+
+	$new    = count( array_diff( $qb_ids, $existing_qb_ids ) );
+	$update = count( array_intersect( $qb_ids, $existing_qb_ids ) );
+
+	// Ghost: published posts whose QB ID is not in this sync result.
+	$published_posts = get_posts( array(
+		'post_type'   => 'course',
+		'post_status' => 'publish',
+		'numberposts' => -1,
+		'meta_key'    => '_arc_qb_record_id',
+		'fields'      => 'ids',
+	) );
+
+	$ghost = 0;
+	foreach ( $published_posts as $post_id ) {
+		$qb_id = intval( get_post_meta( $post_id, '_arc_qb_record_id', true ) );
+		if ( $qb_id > 0 && ! in_array( $qb_id, $qb_ids, true ) ) {
+			$ghost++;
+		}
+	}
+
+	return array(
+		'total'  => count( $records ),
+		'new'    => $new,
+		'update' => $update,
+		'ghost'  => $ghost,
+	);
+}
+
+/**
+ * Handle form POSTs and render the QB Course Sync page.
+ */
+function arc_qb_render_course_sync_page() {
 	if ( ! current_user_can( 'manage_options' ) ) {
 		return;
 	}
 
-	$sync_result = null;
+	$sync_result    = null;
+	$preview_result = null;
 
-	// Handle sync form submission.
-	if (
-		isset( $_POST['arc_qb_sync_all'] ) &&
-		check_admin_referer( 'arc_qb_sync_all_courses', 'arc_qb_sync_nonce' )
-	) {
+	if ( isset( $_POST['arc_qb_preview_courses'] ) &&
+		check_admin_referer( 'arc_qb_preview_courses', 'arc_qb_course_preview_nonce' ) ) {
+		$preview_result = arc_qb_preview_course_sync();
+	}
+
+	if ( isset( $_POST['arc_qb_sync_all'] ) &&
+		check_admin_referer( 'arc_qb_sync_all_courses', 'arc_qb_sync_nonce' ) ) {
 		$sync_result = arc_qb_sync_all_courses();
 	}
 
 	?>
 	<div class="wrap">
-		<h1><?php esc_html_e( 'Arc QB Sync', 'arc-qb-sync' ); ?></h1>
+		<h1><?php esc_html_e( 'QB Course Sync', 'arc-qb-sync' ); ?></h1>
+		<p><?php esc_html_e( 'Pulls all publicly listed courses (Public Listing = checked) from the Quickbase Course Catalog into WordPress. Non-public courses are never imported. Use this for initial setup, after bulk changes in Quickbase, or to recover from a missed webhook. Incremental syncs happen automatically via Zapier.', 'arc-qb-sync' ); ?></p>
+
+		<?php if ( null !== $preview_result ) : ?>
+			<?php if ( is_wp_error( $preview_result ) ) : ?>
+				<div class="notice notice-error is-dismissible">
+					<p><?php echo esc_html( $preview_result->get_error_message() ); ?></p>
+				</div>
+			<?php else : ?>
+				<div class="notice notice-info is-dismissible">
+					<p><strong><?php esc_html_e( 'Preview — no changes made.', 'arc-qb-sync' ); ?></strong></p>
+					<ul>
+						<li><?php printf( esc_html__( 'QB records returned: %d', 'arc-qb-sync' ), $preview_result['total'] ); ?></li>
+						<li><?php printf( esc_html__( 'New posts to create: %d', 'arc-qb-sync' ), $preview_result['new'] ); ?></li>
+						<li><?php printf( esc_html__( 'Existing posts to update: %d', 'arc-qb-sync' ), $preview_result['update'] ); ?></li>
+						<li><?php printf( esc_html__( 'Published posts to draft (removed from QB): %d', 'arc-qb-sync' ), $preview_result['ghost'] ); ?></li>
+					</ul>
+				</div>
+			<?php endif; ?>
+		<?php endif; ?>
 
 		<?php if ( null !== $sync_result ) : ?>
 			<?php if ( 0 === $sync_result['errors'] ) : ?>
 				<div class="notice notice-success is-dismissible">
-					<p><?php
-						printf(
-							esc_html__( 'Sync complete. %d courses synced, %d drafted (removed from QB public listing).', 'arc-qb-sync' ),
-							$sync_result['synced'],
-							$sync_result['ghosted']
-						);
-					?></p>
+					<p><?php printf(
+						esc_html__( 'Sync complete. %d courses synced, %d drafted (removed from QB public listing).', 'arc-qb-sync' ),
+						$sync_result['synced'],
+						$sync_result['ghosted']
+					); ?></p>
 				</div>
 			<?php else : ?>
 				<div class="notice notice-error is-dismissible">
@@ -412,12 +525,14 @@ function arc_qb_render_sync_settings_page() {
 			<?php endif; ?>
 		<?php endif; ?>
 
-		<h2><?php esc_html_e( 'Course Catalog Sync', 'arc-qb-sync' ); ?></h2>
-		<p><?php esc_html_e( 'Run a full sync to pull all publicly listed courses (Public Listing = checked) from the Quickbase Course Catalog into WordPress. Non-public courses are never imported. Use this for initial setup, after bulk changes in Quickbase, or to recover from a missed webhook. Incremental syncs happen automatically via Zapier.', 'arc-qb-sync' ); ?></p>
+		<form method="post" action="" style="display:inline-block; margin-right: 8px;">
+			<?php wp_nonce_field( 'arc_qb_preview_courses', 'arc_qb_course_preview_nonce' ); ?>
+			<?php submit_button( __( 'Preview Sync', 'arc-qb-sync' ), 'secondary', 'arc_qb_preview_courses', false ); ?>
+		</form>
 
-		<form method="post" action="">
+		<form method="post" action="" style="display:inline-block;">
 			<?php wp_nonce_field( 'arc_qb_sync_all_courses', 'arc_qb_sync_nonce' ); ?>
-			<?php submit_button( __( 'Sync All Courses Now', 'arc-qb-sync' ), 'primary', 'arc_qb_sync_all' ); ?>
+			<?php submit_button( __( 'Sync All Courses Now', 'arc-qb-sync' ), 'primary', 'arc_qb_sync_all', false ); ?>
 		</form>
 	</div>
 	<?php

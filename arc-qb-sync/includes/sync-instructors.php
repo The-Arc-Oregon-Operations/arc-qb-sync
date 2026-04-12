@@ -46,7 +46,11 @@ if ( ! defined( 'ARC_QB_INSTRUCTOR_FID_TITLE' ) )        define( 'ARC_QB_INSTRUC
 if ( ! defined( 'ARC_QB_INSTRUCTOR_FID_ORGANIZATION' ) ) define( 'ARC_QB_INSTRUCTOR_FID_ORGANIZATION', 13 ); // Organization
 if ( ! defined( 'ARC_QB_INSTRUCTOR_FID_SLUG' ) )         define( 'ARC_QB_INSTRUCTOR_FID_SLUG',         27 ); // slug (WP post slug)
 if ( ! defined( 'ARC_QB_INSTRUCTOR_FID_ACTIVE' ) )       define( 'ARC_QB_INSTRUCTOR_FID_ACTIVE',       28 ); // Active (checkbox — publish gate)
+<<<<<<< Updated upstream
 // FID 15 — Headshot URL lookup (Image Assets table).
+=======
+if ( ! defined( 'ARC_QB_INSTRUCTOR_PROFILE_FID' ) )      define( 'ARC_QB_INSTRUCTOR_PROFILE_FID',      15 ); // Headshot URL [lookup from Image Assets]
+>>>>>>> Stashed changes
 
 // ── QB fetch helpers ──────────────────────────────────────────────────────────
 
@@ -277,54 +281,139 @@ function arc_qb_sync_all_instructors() {
 	);
 }
 
-// ── Admin settings page ───────────────────────────────────────────────────────
+// ── Admin page — Tools menu ───────────────────────────────────────────────────
 
-add_action( 'admin_menu', 'arc_qb_add_instructor_sync_settings_page' );
+add_action( 'admin_menu', 'arc_qb_add_instructor_sync_page' );
 
 /**
- * Register the Arc Instructor Sync settings page under WP Admin → Settings.
+ * Register the QB Instructor Sync page under WP Admin → Tools.
  */
-function arc_qb_add_instructor_sync_settings_page() {
-	add_options_page(
-		'Arc Instructor Sync',
-		'Arc Instructor Sync',
+function arc_qb_add_instructor_sync_page() {
+	add_management_page(
+		'QB Instructor Sync',
+		'QB Instructor Sync',
 		'manage_options',
-		'arc-instructor-sync',
+		'arc-qb-instructor-sync',
 		'arc_qb_render_instructor_sync_page'
 	);
 }
 
 /**
- * Handle the "Sync All Instructors Now" form POST and render the settings page.
+ * Preview what a full instructor sync would do — reads QB and WP, writes nothing.
+ *
+ * @return array|WP_Error  Keys: total, new, update, ghost. WP_Error on QB failure.
+ */
+function arc_qb_preview_instructor_sync() {
+	$records = arc_qb_fetch_all_instructor_records();
+	if ( is_wp_error( $records ) ) {
+		return $records;
+	}
+
+	$qb_ids = array();
+	foreach ( $records as $record ) {
+		$id = intval( arc_qb_get_course_field( $record, ARC_QB_INSTRUCTOR_FID_RECORD_ID ) );
+		if ( $id > 0 ) {
+			$qb_ids[] = $id;
+		}
+	}
+
+	// Map existing WP instructor posts by QB instructor ID.
+	$existing_posts = get_posts( array(
+		'post_type'   => 'instructor',
+		'post_status' => array( 'publish', 'draft' ),
+		'numberposts' => -1,
+		'meta_key'    => '_arc_qb_instructor_id',
+		'fields'      => 'ids',
+	) );
+
+	$existing_qb_ids = array();
+	foreach ( $existing_posts as $post_id ) {
+		$qb_id = intval( get_post_meta( $post_id, '_arc_qb_instructor_id', true ) );
+		if ( $qb_id > 0 ) {
+			$existing_qb_ids[] = $qb_id;
+		}
+	}
+
+	$new    = count( array_diff( $qb_ids, $existing_qb_ids ) );
+	$update = count( array_intersect( $qb_ids, $existing_qb_ids ) );
+
+	// Ghost: published posts whose QB ID is not in this sync result.
+	$published_posts = get_posts( array(
+		'post_type'   => 'instructor',
+		'post_status' => 'publish',
+		'numberposts' => -1,
+		'meta_key'    => '_arc_qb_instructor_id',
+		'fields'      => 'ids',
+	) );
+
+	$ghost = 0;
+	foreach ( $published_posts as $post_id ) {
+		$qb_id = intval( get_post_meta( $post_id, '_arc_qb_instructor_id', true ) );
+		if ( $qb_id > 0 && ! in_array( $qb_id, $qb_ids, true ) ) {
+			$ghost++;
+		}
+	}
+
+	return array(
+		'total'  => count( $records ),
+		'new'    => $new,
+		'update' => $update,
+		'ghost'  => $ghost,
+	);
+}
+
+/**
+ * Handle form POSTs and render the QB Instructor Sync page.
  */
 function arc_qb_render_instructor_sync_page() {
 	if ( ! current_user_can( 'manage_options' ) ) {
 		return;
 	}
 
-	$sync_result = null;
+	$sync_result    = null;
+	$preview_result = null;
 
-	if (
-		isset( $_POST['arc_qb_sync_all_instructors'] ) &&
-		check_admin_referer( 'arc_qb_sync_all_instructors', 'arc_qb_instructor_sync_nonce' )
-	) {
+	if ( isset( $_POST['arc_qb_preview_instructors'] ) &&
+		check_admin_referer( 'arc_qb_preview_instructors', 'arc_qb_instructor_preview_nonce' ) ) {
+		$preview_result = arc_qb_preview_instructor_sync();
+	}
+
+	if ( isset( $_POST['arc_qb_sync_all_instructors'] ) &&
+		check_admin_referer( 'arc_qb_sync_all_instructors', 'arc_qb_instructor_sync_nonce' ) ) {
 		$sync_result = arc_qb_sync_all_instructors();
 	}
 
 	?>
 	<div class="wrap">
-		<h1><?php esc_html_e( 'Arc Instructor Sync', 'arc-qb-sync' ); ?></h1>
+		<h1><?php esc_html_e( 'QB Instructor Sync', 'arc-qb-sync' ); ?></h1>
+		<p><?php esc_html_e( 'Pulls all active instructors (Active = checked) from the Quickbase Instructors table into WordPress as instructor posts. Inactive instructors are never imported. Use this for initial setup or after bulk changes in Quickbase.', 'arc-qb-sync' ); ?></p>
+
+		<?php if ( null !== $preview_result ) : ?>
+			<?php if ( is_wp_error( $preview_result ) ) : ?>
+				<div class="notice notice-error is-dismissible">
+					<p><?php echo esc_html( $preview_result->get_error_message() ); ?></p>
+				</div>
+			<?php else : ?>
+				<div class="notice notice-info is-dismissible">
+					<p><strong><?php esc_html_e( 'Preview — no changes made.', 'arc-qb-sync' ); ?></strong></p>
+					<ul>
+						<li><?php printf( esc_html__( 'QB records returned: %d', 'arc-qb-sync' ), $preview_result['total'] ); ?></li>
+						<li><?php printf( esc_html__( 'New posts to create: %d', 'arc-qb-sync' ), $preview_result['new'] ); ?></li>
+						<li><?php printf( esc_html__( 'Existing posts to update: %d', 'arc-qb-sync' ), $preview_result['update'] ); ?></li>
+						<li><?php printf( esc_html__( 'Published posts to draft (deactivated in QB): %d', 'arc-qb-sync' ), $preview_result['ghost'] ); ?></li>
+					</ul>
+				</div>
+			<?php endif; ?>
+		<?php endif; ?>
 
 		<?php if ( null !== $sync_result ) : ?>
 			<?php if ( 0 === $sync_result['errors'] ) : ?>
 				<div class="notice notice-success is-dismissible">
-					<p><?php
-						printf(
-							esc_html__( 'Sync complete. %d instructors synced, %d drafted (deactivated in QB).', 'arc-qb-sync' ),
-							$sync_result['synced'],
-							$sync_result['ghosted']
-						);
-					?></p>
+					<p><?php printf(
+						esc_html__( 'Sync complete. %d instructors synced, %d drafted (deactivated in QB).', 'arc-qb-sync' ),
+						$sync_result['synced'],
+						$sync_result['ghosted']
+					); ?></p>
 				</div>
 			<?php else : ?>
 				<div class="notice notice-error is-dismissible">
@@ -340,12 +429,14 @@ function arc_qb_render_instructor_sync_page() {
 			<?php endif; ?>
 		<?php endif; ?>
 
-		<h2><?php esc_html_e( 'Instructor Profiles Sync', 'arc-qb-sync' ); ?></h2>
-		<p><?php esc_html_e( 'Run a full sync to pull all active instructors (Active = checked) from the Quickbase Instructors table into WordPress as instructor posts. Inactive instructors are never imported. Use this for initial setup or after bulk changes in Quickbase.', 'arc-qb-sync' ); ?></p>
+		<form method="post" action="" style="display:inline-block; margin-right: 8px;">
+			<?php wp_nonce_field( 'arc_qb_preview_instructors', 'arc_qb_instructor_preview_nonce' ); ?>
+			<?php submit_button( __( 'Preview Sync', 'arc-qb-sync' ), 'secondary', 'arc_qb_preview_instructors', false ); ?>
+		</form>
 
-		<form method="post" action="">
+		<form method="post" action="" style="display:inline-block;">
 			<?php wp_nonce_field( 'arc_qb_sync_all_instructors', 'arc_qb_instructor_sync_nonce' ); ?>
-			<?php submit_button( __( 'Sync All Instructors Now', 'arc-qb-sync' ), 'primary', 'arc_qb_sync_all_instructors' ); ?>
+			<?php submit_button( __( 'Sync All Instructors Now', 'arc-qb-sync' ), 'primary', 'arc_qb_sync_all_instructors', false ); ?>
 		</form>
 	</div>
 	<?php

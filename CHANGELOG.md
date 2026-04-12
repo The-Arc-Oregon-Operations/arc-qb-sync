@@ -1,5 +1,6 @@
 # Changelog
 
+<<<<<<< Updated upstream
 ## [3.1.2] — 2026-04-12
 
 ### Fixed
@@ -27,6 +28,27 @@
 
 ### Deprecated
 - `[arc_instructor_id]`, `[arc_instructor_name]`, `[arc_instructor_first_name]`, `[arc_instructor_last_name]`, `[arc_instructor_title]`, `[arc_instructor_organization]`, `[arc_instructor_credentials]`, `[arc_instructor_slug]`, `[arc_instructor_bio]`, `[arc_instructor_headshot_url]`, `[arc_instructor_contact_url]`, `[arc_instructor_field]` — use `instructor_*` equivalents for all new work
+=======
+## [3.0.2] — 2026-04-11
+
+### Changed
+- Admin pages moved from Settings to Tools menu (`add_management_page`)
+- Pages renamed: QB Course Sync, QB Event Sync, QB Instructor Sync
+- Language throughout admin pages updated: "Arc QB Sync / Arc Event Sync / Arc Instructor Sync" → "QB Course Sync / QB Event Sync / QB Instructor Sync"
+
+### Added
+- Preview Sync button on all three admin pages — fetches QB records and compares with WP state, reports counts (new / update / ghost) without writing anything
+
+## [3.0.1] — 2026-04-11
+
+### Changed
+- All Quickbase field IDs (FIDs) moved from wp-config.php into the plugin — `sync-events.php`, `sync-courses.php`, `sync-instructors.php` now define their own FID constants
+- `sync-courses.php` select arrays simplified: image FID conditionals removed now that the constants are always defined
+- `docs/setup.md` rewritten with a clean 6-constant wp-config block (credentials and table IDs only); FID tables removed
+
+### Fixed
+- `arc-qb-sync.php` completed — was truncated mid-write during the v3.0.0 session, missing the Events CPT, Instructors CPT, and REST endpoint require_once lines
+>>>>>>> Stashed changes
 
 ## [3.0.0] — 2026-04-11
 
@@ -64,6 +86,7 @@
 
 ### Changed
 - All event shortcodes renamed to consistent `event_` prefix convention; old names registered as deprecated aliases — no breaking change for live pages
+<<<<<<< Updated upstream
 - `course_payment` → `course_base_rate` (shortcode and meta key); QB field relabeled "Base Rate"
 - FID 92 (Slug for Website) now drives `post_name` for course posts — URLs change from title-derived slugs to QB-managed slugs
 - Generic event shortcode: `arc_training_field` → `event_field` (old name kept as alias)
@@ -72,3 +95,6 @@
 
 ### Removed
 - `shortcodes-catalog.php` — deprecated no-op since
+=======
+- `course_payment` → `course_base_rate` (shortcode and meta key); QB field rel
+>>>>>>> Stashed changes

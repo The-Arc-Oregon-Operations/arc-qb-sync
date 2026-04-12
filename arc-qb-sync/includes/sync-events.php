@@ -46,6 +46,22 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+// ── FID constants — Events image lookups and instructor slots ─────────────────
+// These are permanent Quickbase field IDs specific to The Arc Oregon's QB app.
+// They belong in the plugin, not in wp-config.php.
+
+define( 'ARC_QB_EVENT_FEATURED_IMAGE_FID',           464 ); // Events: Featured Image URL [lookup from Image Assets]
+define( 'ARC_QB_EVENT_HERO_IMAGE_FID',               466 ); // Events: Hero Image URL [lookup from Image Assets]
+define( 'ARC_QB_EVENT_INSTRUCTOR1_NAME_FID',         482 ); // Instructor 1 - Name
+define( 'ARC_QB_EVENT_INSTRUCTOR1_HEADSHOT_FID',     483 ); // Instructor 1 - Headshot URL
+define( 'ARC_QB_EVENT_INSTRUCTOR1_HEADSHOT_ALT_FID', 484 ); // Instructor 1 - Headshot Alt Text
+define( 'ARC_QB_EVENT_INSTRUCTOR2_NAME_FID',         486 ); // Instructor 2 - Name
+define( 'ARC_QB_EVENT_INSTRUCTOR2_HEADSHOT_FID',     487 ); // Instructor 2 - Headshot URL
+define( 'ARC_QB_EVENT_INSTRUCTOR2_HEADSHOT_ALT_FID', 494 ); // Instructor 2 - Headshot Alt Text
+define( 'ARC_QB_EVENT_INSTRUCTOR3_NAME_FID',         491 ); // Instructor 3 - Name
+define( 'ARC_QB_EVENT_INSTRUCTOR3_HEADSHOT_FID',     492 ); // Instructor 3 - Headshot URL
+define( 'ARC_QB_EVENT_INSTRUCTOR3_HEADSHOT_ALT_FID', 493 ); // Instructor 3 - Headshot Alt Text
+
 // ── QB fetch helpers ──────────────────────────────────────────────────────────
 
 /**
@@ -307,54 +323,139 @@ function arc_qb_sync_all_events() {
 	);
 }
 
-// ── Admin settings page ───────────────────────────────────────────────────────
+// ── Admin page — Tools menu ───────────────────────────────────────────────────
 
-add_action( 'admin_menu', 'arc_qb_add_event_sync_settings_page' );
+add_action( 'admin_menu', 'arc_qb_add_event_sync_page' );
 
 /**
- * Register the Arc Event Sync settings page under WP Admin → Settings.
+ * Register the QB Event Sync page under WP Admin → Tools.
  */
-function arc_qb_add_event_sync_settings_page() {
-	add_options_page(
-		'Arc Event Sync',
-		'Arc Event Sync',
+function arc_qb_add_event_sync_page() {
+	add_management_page(
+		'QB Event Sync',
+		'QB Event Sync',
 		'manage_options',
-		'arc-event-sync',
+		'arc-qb-event-sync',
 		'arc_qb_render_event_sync_page'
 	);
 }
 
 /**
- * Handle the "Sync All Events Now" form POST and render the settings page.
+ * Preview what a full event sync would do — reads QB and WP, writes nothing.
+ *
+ * @return array|WP_Error  Keys: total, new, update, ghost. WP_Error on QB failure.
+ */
+function arc_qb_preview_event_sync() {
+	$records = arc_qb_fetch_all_event_records();
+	if ( is_wp_error( $records ) ) {
+		return $records;
+	}
+
+	$qb_ids = array();
+	foreach ( $records as $record ) {
+		$id = intval( arc_qb_get_course_field( $record, 3 ) );
+		if ( $id > 0 ) {
+			$qb_ids[] = $id;
+		}
+	}
+
+	// Map existing WP arc_event posts by QB event ID.
+	$existing_posts = get_posts( array(
+		'post_type'   => 'arc_event',
+		'post_status' => array( 'publish', 'draft' ),
+		'numberposts' => -1,
+		'meta_key'    => '_arc_qb_event_id',
+		'fields'      => 'ids',
+	) );
+
+	$existing_qb_ids = array();
+	foreach ( $existing_posts as $post_id ) {
+		$qb_id = intval( get_post_meta( $post_id, '_arc_qb_event_id', true ) );
+		if ( $qb_id > 0 ) {
+			$existing_qb_ids[] = $qb_id;
+		}
+	}
+
+	$new    = count( array_diff( $qb_ids, $existing_qb_ids ) );
+	$update = count( array_intersect( $qb_ids, $existing_qb_ids ) );
+
+	// Ghost: published posts whose QB ID is not in this sync result.
+	$published_posts = get_posts( array(
+		'post_type'   => 'arc_event',
+		'post_status' => 'publish',
+		'numberposts' => -1,
+		'meta_key'    => '_arc_qb_event_id',
+		'fields'      => 'ids',
+	) );
+
+	$ghost = 0;
+	foreach ( $published_posts as $post_id ) {
+		$qb_id = intval( get_post_meta( $post_id, '_arc_qb_event_id', true ) );
+		if ( $qb_id > 0 && ! in_array( $qb_id, $qb_ids, true ) ) {
+			$ghost++;
+		}
+	}
+
+	return array(
+		'total'  => count( $records ),
+		'new'    => $new,
+		'update' => $update,
+		'ghost'  => $ghost,
+	);
+}
+
+/**
+ * Handle form POSTs and render the QB Event Sync page.
  */
 function arc_qb_render_event_sync_page() {
 	if ( ! current_user_can( 'manage_options' ) ) {
 		return;
 	}
 
-	$sync_result = null;
+	$sync_result    = null;
+	$preview_result = null;
 
-	if (
-		isset( $_POST['arc_qb_sync_all_events'] ) &&
-		check_admin_referer( 'arc_qb_sync_all_events', 'arc_qb_event_sync_nonce' )
-	) {
+	if ( isset( $_POST['arc_qb_preview_events'] ) &&
+		check_admin_referer( 'arc_qb_preview_events', 'arc_qb_event_preview_nonce' ) ) {
+		$preview_result = arc_qb_preview_event_sync();
+	}
+
+	if ( isset( $_POST['arc_qb_sync_all_events'] ) &&
+		check_admin_referer( 'arc_qb_sync_all_events', 'arc_qb_event_sync_nonce' ) ) {
 		$sync_result = arc_qb_sync_all_events();
 	}
 
 	?>
 	<div class="wrap">
-		<h1><?php esc_html_e( 'Arc Event Sync', 'arc-qb-sync' ); ?></h1>
+		<h1><?php esc_html_e( 'QB Event Sync', 'arc-qb-sync' ); ?></h1>
+		<p><?php esc_html_e( 'Pulls all publicly listed events (Show Public = checked) from the Quickbase Training Events table into WordPress as event posts. Non-public events are never imported. Use this for initial setup, after bulk changes in Quickbase, or to recover from a missed webhook.', 'arc-qb-sync' ); ?></p>
+
+		<?php if ( null !== $preview_result ) : ?>
+			<?php if ( is_wp_error( $preview_result ) ) : ?>
+				<div class="notice notice-error is-dismissible">
+					<p><?php echo esc_html( $preview_result->get_error_message() ); ?></p>
+				</div>
+			<?php else : ?>
+				<div class="notice notice-info is-dismissible">
+					<p><strong><?php esc_html_e( 'Preview — no changes made.', 'arc-qb-sync' ); ?></strong></p>
+					<ul>
+						<li><?php printf( esc_html__( 'QB records returned: %d', 'arc-qb-sync' ), $preview_result['total'] ); ?></li>
+						<li><?php printf( esc_html__( 'New posts to create: %d', 'arc-qb-sync' ), $preview_result['new'] ); ?></li>
+						<li><?php printf( esc_html__( 'Existing posts to update: %d', 'arc-qb-sync' ), $preview_result['update'] ); ?></li>
+						<li><?php printf( esc_html__( 'Published posts to draft (removed from QB): %d', 'arc-qb-sync' ), $preview_result['ghost'] ); ?></li>
+					</ul>
+				</div>
+			<?php endif; ?>
+		<?php endif; ?>
 
 		<?php if ( null !== $sync_result ) : ?>
 			<?php if ( 0 === $sync_result['errors'] ) : ?>
 				<div class="notice notice-success is-dismissible">
-					<p><?php
-						printf(
-							esc_html__( 'Sync complete. %d events synced, %d drafted (removed from QB public listing).', 'arc-qb-sync' ),
-							$sync_result['synced'],
-							$sync_result['ghosted']
-						);
-					?></p>
+					<p><?php printf(
+						esc_html__( 'Sync complete. %d events synced, %d drafted (removed from QB public listing).', 'arc-qb-sync' ),
+						$sync_result['synced'],
+						$sync_result['ghosted']
+					); ?></p>
 				</div>
 			<?php else : ?>
 				<div class="notice notice-error is-dismissible">
@@ -370,12 +471,14 @@ function arc_qb_render_event_sync_page() {
 			<?php endif; ?>
 		<?php endif; ?>
 
-		<h2><?php esc_html_e( 'Training Events Sync', 'arc-qb-sync' ); ?></h2>
-		<p><?php esc_html_e( 'Run a full sync to pull all publicly listed events (Show Public = checked) from the Quickbase Training Events table into WordPress as arc_event posts. Non-public events are never imported. Use this for initial setup, after bulk changes in Quickbase, or to recover from a missed webhook.', 'arc-qb-sync' ); ?></p>
+		<form method="post" action="" style="display:inline-block; margin-right: 8px;">
+			<?php wp_nonce_field( 'arc_qb_preview_events', 'arc_qb_event_preview_nonce' ); ?>
+			<?php submit_button( __( 'Preview Sync', 'arc-qb-sync' ), 'secondary', 'arc_qb_preview_events', false ); ?>
+		</form>
 
-		<form method="post" action="">
+		<form method="post" action="" style="display:inline-block;">
 			<?php wp_nonce_field( 'arc_qb_sync_all_events', 'arc_qb_event_sync_nonce' ); ?>
-			<?php submit_button( __( 'Sync All Events Now', 'arc-qb-sync' ), 'primary', 'arc_qb_sync_all_events' ); ?>
+			<?php submit_button( __( 'Sync All Events Now', 'arc-qb-sync' ), 'primary', 'arc_qb_sync_all_events', false ); ?>
 		</form>
 	</div>
 	<?php
