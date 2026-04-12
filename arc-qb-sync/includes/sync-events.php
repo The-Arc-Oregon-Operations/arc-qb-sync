@@ -161,19 +161,19 @@ function arc_qb_upsert_event( array $record ) {
 
 	// ── Build WP post array (public events only) ──────────────────────────────
 
-	$post_slug = sanitize_title( $title );
-
 	$post_data = array(
 		'post_type'   => 'arc_event',
 		'post_title'  => sanitize_text_field( $title ),
 		'post_status' => 'publish',
-		'post_name'   => $post_slug,
 	);
 
 	if ( $post_id > 0 ) {
 		$post_data['ID'] = $post_id;
-		$result          = wp_update_post( $post_data, true );
+		// post_name is intentionally omitted on update — slug is set once on insert
+		// and never changed, so existing URLs remain stable even if the title changes in QB.
+		$result = wp_update_post( $post_data, true );
 	} else {
+		$post_data['post_name'] = sanitize_title( $title );
 		$result = wp_insert_post( $post_data, true );
 	}
 
@@ -289,6 +289,7 @@ function arc_qb_sync_all_events() {
 		if ( is_wp_error( $result ) ) {
 			$errors++;
 			$messages[] = $result->get_error_message();
+			error_log( '[arc-qb-sync] Event upsert failed for QB record ' . $qb_id . ': ' . $result->get_error_message() );
 		} else {
 			$synced++;
 		}

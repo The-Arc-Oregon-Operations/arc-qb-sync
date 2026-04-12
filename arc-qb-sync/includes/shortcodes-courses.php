@@ -319,7 +319,7 @@ function arc_qb_sc_course_learning_objectives2() {
  * Reads _arc_qb_record_id from WP post meta — no QB fetch required.
  */
 function arc_qb_shortcode_course_request_url( $atts ) {
-	$post_id = get_the_ID();
+	$post_id = arc_qb_get_course_post_id();
 	if ( ! $post_id ) {
 		return '';
 	}
@@ -354,6 +354,9 @@ function arc_qb_shortcode_course_request_url( $atts ) {
  *   88 → _arc_course_image_url
  *   89 → _arc_course_attribution
  *   90 → _arc_course_use_attribution
+ *   92 → _arc_course_slug
+ *   94 → _arc_course_featured_image_url
+ *   96 → _arc_course_hero_image_url
  *
  * @param array $atts  Shortcode attributes: id (required), format (text|html).
  * @return string
@@ -395,6 +398,11 @@ function arc_qb_sc_course_field_generic( $atts ) {
 		88 => '_arc_course_image_url',
 		89 => '_arc_course_attribution',
 		90 => '_arc_course_use_attribution',
+		92 => '_arc_course_slug',
+		94 => '_arc_course_featured_image_url',
+		96 => '_arc_course_hero_image_url',
+		// FID 56 (tags) is intentionally excluded — it is taxonomy-based and not
+		// accessible as a simple meta string; use [course_tags] instead.
 	);
 
 	if ( ! isset( $field_map[ $field_id ] ) ) {

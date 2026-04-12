@@ -1,62 +1,89 @@
 # Courses Module — Field Mapping Reference
 
-**Quickbase App ID:** `bc7mmze9h`  
-**Realm:** `otac.quickbase.com`  
-**Table ID:** `bc7mmze9m` (set via `QB_COURSES_TABLE_ID` constant)  
-**URL pattern:** `/course-catalog/?course-id=NNNN`
+**Quickbase App ID:** `bc7mmze9h`
+**Realm:** `otac.quickbase.com`
+**Table ID:** `bc7mmze9m` (set via `QB_COURSES_TABLE_ID` constant)
+
+**Synced FIDs:** 3, 6, 14, 20, 36, 39, 40, 43, 46, 50, 56, 62, 84, 85, 88, 89, 90, 92, 94, 96
 
 ---
 
-## Detail Page Fields
+## Field Map
 
-| QB Field ID | QB Label | QB Type | Shortcode | Output Treatment | Notes |
-|---|---|---|---|---|---|
-| 3 | Record ID# | Record ID | *(filter key)* | — | Used in `{3.EX.[course-id]}` query; used as tile CTA link param |
-| 6 | Course Title | Text | `[course_title]` | `esc_html()` | Also used as `<img alt>` in catalog tiles |
-| 7 | Description + Learning Objectives | Text | *(fallback)* | `wp_kses_post( wpautop() )` | Used by `[course_description]` only when field 85 is empty |
-| 14 | Hours of Instruction | Duration | `[course_length]` | `esc_html()` | QB returns as-is; shown as tile "Length" label |
-| 36 | Public Listing | Checkbox | *(visibility flag)* | — | `true` = show on website; used as catalog query filter `{36.EX.true}` |
-| 39 | Payment | Currency | `[course_payment]` | `esc_html()` | QB returns numeric; display as-is |
-| 40 | Delivery Method | Text (multiple choice) | `[course_delivery_method]` | `esc_html()` | |
-| 43 | Category | Text (multiple choice) | `[course_category]` | `esc_html()` | |
-| 46 | Description, Short | Text (multi-line) | `[course_short_description]` | `wp_kses_post( wpautop() )` | Tile preview text + detail page intro |
-| 50 | Target Audience - English | Text (multi-line) | `[course_target_audience]` | `wp_kses_post( wpautop() )` | |
-| 56 | Keywords / Tags | Multi-line Text | `[course_tags]` | Tag `<span>` pills | Parsed by `arc_qb_parse_tags()`. ⚠️ Delimiter assumed `\n` — verify against live API |
-| 62 | Learning Objectives | Text (multi-line) | *(fallback)* | `wp_kses_post( wpautop() )` | Used by `[course_learning_objectives]` when field 85 is empty |
-| 85 | Learning Objectives - HTML | Rich Text | `[course_description]` / `[course_learning_objectives]` | `wp_kses_post( wpautop() )` | Preferred source; falls back to field 7 (description) or 62 (objectives) |
-| 88 | Featured Image URL | URL | `[course_image_url]` | `esc_url()` | Tile image + detail page hero |
+| QB FID | QB Label | Meta Key / WP Field | Shortcode | Notes |
+|--------|----------|---------------------|-----------|-------|
+| 3 | Record ID# | `_arc_qb_record_id` | `[course_id]` | Sync key; used in `{3.EX.NNNN}` QB query |
+| 6 | Course Title | `post_title` | `[course_title]` | Also drives `<img alt>` in catalog tiles |
+| 14 | Hours of Instruction | `_arc_course_length_ms` (raw ms) + `_arc_course_length` (formatted) | `[course_length]` | Formatted by `arc_qb_format_duration()`, e.g. "6.5 hours" |
+| 20 | Length Num | `_arc_course_hours` | `[course_hours]` | Numeric hours value |
+| 36 | Public Listing | `post_status` (publish / draft) | *(visibility flag)* | `true` = publish; `false` = draft existing post; never create non-public posts |
+| 39 | Base Rate | `_arc_course_base_rate` | `[course_base_rate]` | Renamed from `course_payment` in v2.2.0 |
+| 40 | Delivery Method | `_arc_course_delivery_method` | `[course_delivery_method]` | |
+| 43 | Category | `_arc_course_category` | `[course_category]` | |
+| 46 | Description, Short | `post_excerpt` | `[course_short_description]` | Tile preview text + detail page intro |
+| 50 | Target Audience - English | `_arc_course_target_audience` | `[course_target_audience]` | Stored and output as HTML (`wp_kses_post`) |
+| 56 | Keywords / Tags | `course_tag` taxonomy + `_course_tag_slugs` | `[course_tags]` | Parsed by `arc_qb_parse_tags()`; `_course_tag_slugs` is a comma-separated slug string for Elementor `data-tags`; **not accessible via `[course_field]`** (taxonomy-based — use `[course_tags]` instead) |
+| 62 | Learning Objectives | `_arc_course_learning_objectives_html` | `[course_description]` / `[course_learning_objectives]` | Primary display field; stored as HTML |
+| 84 | Link to Course Overview Page | `_arc_course_details_url` | `[course_details_url]` | Stored via `esc_url_raw()` |
+| 85 | Learning Objectives (secondary) | `_arc_course_learning_objectives` | `[course_learning_objectives2]` | Secondary field; `[course_learning_objectives]` falls back to FID 62 if this is empty |
+| 88 | Featured Image URL (legacy) | `_arc_course_image_url` | `[course_image_url]` | Legacy manual URL field |
+| 89 | Attribution | `_arc_course_attribution` | `[course_attribution]` | Note: FID 89 in the Events table is "Event Time" — separate table, independent FID numbering |
+| 90 | Use Attribution | `_arc_course_use_attribution` | `[course_use_attribution]` | Checkbox; stored as `"1"` or `"0"` |
+| 92 | Slug for Website | `_arc_course_slug` + `post_name` | `[course_field id="92"]` | Drives `post_name` on insert and update; QB-managed stable URL slug |
+| 94 | Featured Image URL | `_arc_course_featured_image_url` | `[course_featured_image_url]` / `[course_field id="94"]` | Lookup from Image Assets table; preferred over FID 88 for new templates |
+| 96 | Hero Image URL | `_arc_course_hero_image_url` | `[course_hero_image_url]` / `[course_field id="96"]` | Lookup from Image Assets table |
 
 ---
 
-## Catalog Tile Fields (fetched by `arc_qb_get_public_courses()`)
+## Constructed Shortcode
 
-The catalog fetch selects only the fields needed for tiles — not the full detail set — to keep payloads small:
-
-| Field ID | Label | Used for |
-|---|---|---|
-| 3 | Record ID# | CTA link `?course-id=` param |
-| 6 | Course Title | Tile heading |
-| 14 | Hours of Instruction | Tile "Length" line |
-| 46 | Description, Short | Embedded in JSON for potential JS use |
-| 56 | Keywords / Tags | Filter pills; tile tag pills |
-| 88 | Featured Image URL | Tile image |
+| Shortcode | Description |
+|-----------|-------------|
+| `[course_request_url]` | Builds the organization training request CTA URL from `_arc_qb_record_id`. No QB fetch required. Works on both CPT pages and legacy `?course-id=NNNN` pages. |
 
 ---
 
 ## Generic Shortcode
 
-Any Course Catalog field can be accessed by ID:
+Any synced field can be accessed by QB field ID:
 
 ```
-[arc_qb_course_field id="NNNN"]
-[arc_qb_course_field id="85" format="html"]
+[course_field id="NNNN"]
+[course_field id="85" format="html"]
 ```
 
 - `format="text"` (default) — `esc_html()`
 - `format="html"` — `wp_kses_post( wpautop() )`
 
+**Supported IDs:** 3, 6, 14, 20, 39, 40, 43, 46, 50, 62, 84, 85, 88, 89, 90, 92, 94, 96
+
+**Not supported via `[course_field]`:** FID 56 (tags) — taxonomy-based, use `[course_tags]` instead.
+
 ---
 
-## Tags Field Note
+## URL Field Convention
 
-Field 56 is a Multi-line Text field in QB. The `arc_qb_parse_tags()` function splits on `\n` (newline). If the live QB API returns tags with a different delimiter (e.g. comma, pipe), update the `$delimiter` variable in `includes/courses.php`.
+Fields that store URLs use the `_url` suffix in their meta key and have dedicated shortcodes ending in `_url`:
+
+| Meta Key | Shortcode |
+|----------|-----------|
+| `_arc_course_image_url` | `[course_image_url]` |
+| `_arc_course_details_url` | `[course_details_url]` |
+| `_arc_course_featured_image_url` | `[course_featured_image_url]` |
+| `_arc_course_hero_image_url` | `[course_hero_image_url]` |
+
+---
+
+## Context Resolution
+
+All `[course_*]` shortcodes use `arc_qb_get_course_post_id()` to resolve context:
+
+1. If the current post is a `course` CPT, use its ID.
+2. If `?course-id=NNNN` is in the URL, look up the `course` post by `_arc_qb_record_id` meta.
+3. Return empty if no course context is found.
+
+This means all shortcodes work on both native CPT permalinks (`/course/[slug]/`) and legacy `?course-id=NNNN` pages without template changes.
+
+---
+
+*See also: `docs/field-mapping-events.md`, `docs/field-mapping-instructors.md`*

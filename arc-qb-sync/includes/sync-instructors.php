@@ -46,11 +46,7 @@ if ( ! defined( 'ARC_QB_INSTRUCTOR_FID_TITLE' ) )        define( 'ARC_QB_INSTRUC
 if ( ! defined( 'ARC_QB_INSTRUCTOR_FID_ORGANIZATION' ) ) define( 'ARC_QB_INSTRUCTOR_FID_ORGANIZATION', 13 ); // Organization
 if ( ! defined( 'ARC_QB_INSTRUCTOR_FID_SLUG' ) )         define( 'ARC_QB_INSTRUCTOR_FID_SLUG',         27 ); // slug (WP post slug)
 if ( ! defined( 'ARC_QB_INSTRUCTOR_FID_ACTIVE' ) )       define( 'ARC_QB_INSTRUCTOR_FID_ACTIVE',       28 ); // Active (checkbox — publish gate)
-<<<<<<< Updated upstream
-// FID 15 — Headshot URL lookup (Image Assets table).
-=======
 if ( ! defined( 'ARC_QB_INSTRUCTOR_PROFILE_FID' ) )      define( 'ARC_QB_INSTRUCTOR_PROFILE_FID',      15 ); // Headshot URL [lookup from Image Assets]
->>>>>>> Stashed changes
 
 // ── QB fetch helpers ──────────────────────────────────────────────────────────
 
@@ -78,7 +74,7 @@ function arc_qb_fetch_all_instructor_records() {
 		ARC_QB_INSTRUCTOR_FID_BIO,          // 11
 		ARC_QB_INSTRUCTOR_FID_TITLE,        // 12
 		ARC_QB_INSTRUCTOR_FID_ORGANIZATION, // 13
-		15,                                 // FID 15 — Headshot URL lookup
+		ARC_QB_INSTRUCTOR_PROFILE_FID,      // ARC_QB_INSTRUCTOR_PROFILE_FID
 		ARC_QB_INSTRUCTOR_FID_SLUG,         // 27
 		ARC_QB_INSTRUCTOR_FID_ACTIVE,       // 28
 	);
@@ -203,7 +199,7 @@ function arc_qb_upsert_instructor( array $record ) {
 	update_post_meta( $post_id, '_arc_instructor_organization',
 		sanitize_text_field( arc_qb_get_course_field( $record, ARC_QB_INSTRUCTOR_FID_ORGANIZATION ) ) );
 	update_post_meta( $post_id, '_arc_instructor_headshot_url',
-		esc_url_raw( arc_qb_get_course_field( $record, 15 ) ) );
+		esc_url_raw( arc_qb_get_course_field( $record, ARC_QB_INSTRUCTOR_PROFILE_FID ) ) );
 	update_post_meta( $post_id, '_arc_instructor_slug', $post_name );
 
 	return $post_id;
@@ -247,6 +243,7 @@ function arc_qb_sync_all_instructors() {
 		if ( is_wp_error( $result ) ) {
 			$errors++;
 			$messages[] = $result->get_error_message();
+			error_log( '[arc-qb-sync] Instructor upsert failed for QB record ' . $qb_id . ': ' . $result->get_error_message() );
 		} else {
 			$synced++;
 		}

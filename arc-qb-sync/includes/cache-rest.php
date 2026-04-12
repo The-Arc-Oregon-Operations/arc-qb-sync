@@ -92,6 +92,7 @@ function arc_qb_handle_sync_course( $request ) {
 	$record = arc_qb_fetch_course_record( $record_id );
 
 	if ( is_wp_error( $record ) ) {
+		error_log( '[arc-qb-sync] Webhook fetch failed for record_id ' . $record_id . ': ' . $record->get_error_message() );
 		return new WP_Error(
 			'arc_qb_fetch_failed',
 			$record->get_error_message(),
@@ -103,6 +104,7 @@ function arc_qb_handle_sync_course( $request ) {
 	$post_id = arc_qb_upsert_course( $record );
 
 	if ( is_wp_error( $post_id ) ) {
+		error_log( '[arc-qb-sync] Webhook upsert failed for record_id ' . $record_id . ': ' . $post_id->get_error_message() );
 		return new WP_Error(
 			'arc_qb_upsert_failed',
 			$post_id->get_error_message(),

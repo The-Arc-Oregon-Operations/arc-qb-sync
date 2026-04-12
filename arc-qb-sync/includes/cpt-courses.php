@@ -80,7 +80,7 @@ function arc_qb_register_course_tag_taxonomy() {
 	);
 }
 
-// ── 2. Legacy ?course-id= redirect ───────────────────────────────────────────
+// ── 3. Legacy ?course-id= redirect ───────────────────────────────────────────
 
 add_action( 'template_redirect', 'arc_qb_redirect_legacy_course_url' );
 
