@@ -1,23 +1,23 @@
 <?php
 /**
- * Instructor CPT shortcodes — v3.
+ * Instructor CPT shortcodes — v3.1.
  *
  * All shortcodes read from WP post meta on `instructor` CPT posts.
- * They use the `arc_instructor_` prefix.
+ * Primary prefix is `instructor_*`; `arc_instructor_*` names remain as deprecated aliases.
  *
- * Shortcodes provided:
- *   [arc_instructor_id]           — _arc_qb_instructor_id
- *   [arc_instructor_name]         — post_title (get_the_title)
- *   [arc_instructor_first_name]   — _arc_instructor_first_name
- *   [arc_instructor_last_name]    — _arc_instructor_last_name
- *   [arc_instructor_title]        — _arc_instructor_title
- *   [arc_instructor_organization] — _arc_instructor_organization
- *   [arc_instructor_credentials]  — _arc_instructor_credentials
- *   [arc_instructor_slug]         — _arc_instructor_slug
- *   [arc_instructor_bio]          — _arc_instructor_bio
- *   [arc_instructor_contact_url]  — _arc_instructor_contact_url
- *   [arc_instructor_headshot_url] — _arc_instructor_headshot_url
- *   [arc_instructor_field]        — generic meta access by key
+ * Shortcodes provided (primary → deprecated alias):
+ *   [instructor_id]           / [arc_instructor_id]           — _arc_qb_instructor_id
+ *   [instructor_name]         / [arc_instructor_name]         — post_title (get_the_title)
+ *   [instructor_first_name]   / [arc_instructor_first_name]   — _arc_instructor_first_name
+ *   [instructor_last_name]    / [arc_instructor_last_name]    — _arc_instructor_last_name
+ *   [instructor_title]        / [arc_instructor_title]        — _arc_instructor_title
+ *   [instructor_organization] / [arc_instructor_organization] — _arc_instructor_organization
+ *   [instructor_credentials]  / [arc_instructor_credentials]  — _arc_instructor_credentials
+ *   [instructor_slug]         / [arc_instructor_slug]         — _arc_instructor_slug
+ *   [instructor_bio]          / [arc_instructor_bio]          — _arc_instructor_bio
+ *   [instructor_contact_url]  / [arc_instructor_contact_url]  — _arc_instructor_contact_url
+ *   [instructor_headshot_url] / [arc_instructor_headshot_url] — _arc_instructor_headshot_url
+ *   [instructor_field]        / [arc_instructor_field]        — generic meta access by key
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -102,16 +102,39 @@ function arc_qb_shortcode_arc_instructor_field_generic( $atts ) {
 add_action( 'init', 'arc_qb_register_arc_instructor_shortcodes' );
 
 function arc_qb_register_arc_instructor_shortcodes() {
-	add_shortcode( 'arc_instructor_id',           'arc_qb_sc_arc_instructor_id' );
-	add_shortcode( 'arc_instructor_name',         'arc_qb_sc_arc_instructor_name' );
-	add_shortcode( 'arc_instructor_first_name',   'arc_qb_sc_arc_instructor_first_name' );
-	add_shortcode( 'arc_instructor_last_name',    'arc_qb_sc_arc_instructor_last_name' );
-	add_shortcode( 'arc_instructor_title',        'arc_qb_sc_arc_instructor_title' );
-	add_shortcode( 'arc_instructor_organization', 'arc_qb_sc_arc_instructor_organization' );
-	add_shortcode( 'arc_instructor_credentials',  'arc_qb_sc_arc_instructor_credentials' );
-	add_shortcode( 'arc_instructor_slug',         'arc_qb_sc_arc_instructor_slug' );
-	add_shortcode( 'arc_instructor_bio',          'arc_qb_sc_arc_instructor_bio' );
-	add_shortcode( 'arc_instructor_contact_url',  'arc_qb_sc_arc_instructor_contact_url' );
-	add_shortcode( 'arc_instructor_headshot_url', 'arc_qb_sc_arc_instructor_headshot_url' );
-	add_shortcode( 'arc_instructor_field',        'arc_qb_shortcode_arc_instructor_field_generic' );
+	add_shortcode( 'instructor_id',           'arc_qb_sc_arc_instructor_id' );
+	add_shortcode( 'arc_instructor_id',       'arc_qb_sc_arc_instructor_id' ); // Deprecated alias — remove in future version
+
+	add_shortcode( 'instructor_name',         'arc_qb_sc_arc_instructor_name' );
+	add_shortcode( 'arc_instructor_name',     'arc_qb_sc_arc_instructor_name' ); // Deprecated alias — remove in future version
+
+	add_shortcode( 'instructor_first_name',     'arc_qb_sc_arc_instructor_first_name' );
+	add_shortcode( 'arc_instructor_first_name', 'arc_qb_sc_arc_instructor_first_name' ); // Deprecated alias — remove in future version
+
+	add_shortcode( 'instructor_last_name',     'arc_qb_sc_arc_instructor_last_name' );
+	add_shortcode( 'arc_instructor_last_name', 'arc_qb_sc_arc_instructor_last_name' ); // Deprecated alias — remove in future version
+
+	add_shortcode( 'instructor_title',     'arc_qb_sc_arc_instructor_title' );
+	add_shortcode( 'arc_instructor_title', 'arc_qb_sc_arc_instructor_title' ); // Deprecated alias — remove in future version
+
+	add_shortcode( 'instructor_organization',     'arc_qb_sc_arc_instructor_organization' );
+	add_shortcode( 'arc_instructor_organization', 'arc_qb_sc_arc_instructor_organization' ); // Deprecated alias — remove in future version
+
+	add_shortcode( 'instructor_credentials',     'arc_qb_sc_arc_instructor_credentials' );
+	add_shortcode( 'arc_instructor_credentials', 'arc_qb_sc_arc_instructor_credentials' ); // Deprecated alias — remove in future version
+
+	add_shortcode( 'instructor_slug',     'arc_qb_sc_arc_instructor_slug' );
+	add_shortcode( 'arc_instructor_slug', 'arc_qb_sc_arc_instructor_slug' ); // Deprecated alias — remove in future version
+
+	add_shortcode( 'instructor_bio',     'arc_qb_sc_arc_instructor_bio' );
+	add_shortcode( 'arc_instructor_bio', 'arc_qb_sc_arc_instructor_bio' ); // Deprecated alias — remove in future version
+
+	add_shortcode( 'instructor_contact_url',     'arc_qb_sc_arc_instructor_contact_url' );
+	add_shortcode( 'arc_instructor_contact_url', 'arc_qb_sc_arc_instructor_contact_url' ); // Deprecated alias — remove in future version
+
+	add_shortcode( 'instructor_headshot_url',     'arc_qb_sc_arc_instructor_headshot_url' );
+	add_shortcode( 'arc_instructor_headshot_url', 'arc_qb_sc_arc_instructor_headshot_url' ); // Deprecated alias — remove in future version
+
+	add_shortcode( 'instructor_field',     'arc_qb_shortcode_arc_instructor_field_generic' );
+	add_shortcode( 'arc_instructor_field', 'arc_qb_shortcode_arc_instructor_field_generic' ); // Deprecated alias — remove in future version
 }

@@ -1,5 +1,14 @@
 # Changelog
 
+## [3.1.0] — 2026-04-11
+
+### Changed
+- Instructor shortcodes migrated to clean `instructor_*` prefix to match `course_*` and `event_*` conventions
+- `arc_instructor_*` shortcodes remain registered as deprecated aliases — no breaking change for live pages
+
+### Deprecated
+- `[arc_instructor_id]`, `[arc_instructor_name]`, `[arc_instructor_first_name]`, `[arc_instructor_last_name]`, `[arc_instructor_title]`, `[arc_instructor_organization]`, `[arc_instructor_credentials]`, `[arc_instructor_slug]`, `[arc_instructor_bio]`, `[arc_instructor_headshot_url]`, `[arc_instructor_contact_url]`, `[arc_instructor_field]` — use `instructor_*` equivalents for all new work
+
 ## [3.0.0] — 2026-04-11
 
 ### Added
