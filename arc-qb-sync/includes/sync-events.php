@@ -29,17 +29,17 @@
  *   454 → _arc_event_is_multisession
  *   458 → _arc_event_mode
  *   461 → _arc_event_image_url (legacy manual field)
- *   ARC_QB_EVENT_FEATURED_IMAGE_FID (464) → _arc_event_featured_image_url
- *   ARC_QB_EVENT_HERO_IMAGE_FID     (466) → _arc_event_hero_image_url
- *   ARC_QB_EVENT_INSTRUCTOR1_NAME_FID        (482) → _arc_event_instructor1_name
- *   ARC_QB_EVENT_INSTRUCTOR1_HEADSHOT_FID    (483) → _arc_event_instructor1_headshot_url
- *   ARC_QB_EVENT_INSTRUCTOR1_HEADSHOT_ALT_FID (484) → _arc_event_instructor1_headshot_alt
- *   ARC_QB_EVENT_INSTRUCTOR2_NAME_FID        (486) → _arc_event_instructor2_name
- *   ARC_QB_EVENT_INSTRUCTOR2_HEADSHOT_FID    (487) → _arc_event_instructor2_headshot_url
- *   ARC_QB_EVENT_INSTRUCTOR2_HEADSHOT_ALT_FID (494) → _arc_event_instructor2_headshot_alt
- *   ARC_QB_EVENT_INSTRUCTOR3_NAME_FID        (491) → _arc_event_instructor3_name
- *   ARC_QB_EVENT_INSTRUCTOR3_HEADSHOT_FID    (492) → _arc_event_instructor3_headshot_url
- *   ARC_QB_EVENT_INSTRUCTOR3_HEADSHOT_ALT_FID (493) → _arc_event_instructor3_headshot_alt
+ *   464 → _arc_event_featured_image_url
+ *   466 → _arc_event_hero_image_url
+ *   482 → _arc_event_instructor1_name
+ *   483 → _arc_event_instructor1_headshot_url
+ *   484 → _arc_event_instructor1_headshot_alt
+ *   486 → _arc_event_instructor2_name
+ *   487 → _arc_event_instructor2_headshot_url
+ *   494 → _arc_event_instructor2_headshot_alt
+ *   491 → _arc_event_instructor3_name
+ *   492 → _arc_event_instructor3_headshot_url
+ *   493 → _arc_event_instructor3_headshot_alt
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -68,20 +68,8 @@ function arc_qb_fetch_all_event_records() {
 	// Base fields — always included.
 	$select = array( 3, 14, 19, 29, 45, 89, 137, 267, 271, 361, 413, 440, 449, 450, 453, 454, 458, 461 );
 
-	// Image lookup FIDs — all non-zero (constants are fully defined).
-	$select[] = ARC_QB_EVENT_FEATURED_IMAGE_FID; // 464
-	$select[] = ARC_QB_EVENT_HERO_IMAGE_FID;     // 466
-
-	// Instructor slot FIDs — all non-zero (constants are fully defined).
-	$select[] = ARC_QB_EVENT_INSTRUCTOR1_NAME_FID;          // 482
-	$select[] = ARC_QB_EVENT_INSTRUCTOR1_HEADSHOT_FID;      // 483
-	$select[] = ARC_QB_EVENT_INSTRUCTOR1_HEADSHOT_ALT_FID;  // 484
-	$select[] = ARC_QB_EVENT_INSTRUCTOR2_NAME_FID;          // 486
-	$select[] = ARC_QB_EVENT_INSTRUCTOR2_HEADSHOT_FID;      // 487
-	$select[] = ARC_QB_EVENT_INSTRUCTOR2_HEADSHOT_ALT_FID;  // 494
-	$select[] = ARC_QB_EVENT_INSTRUCTOR3_NAME_FID;          // 491
-	$select[] = ARC_QB_EVENT_INSTRUCTOR3_HEADSHOT_FID;      // 492
-	$select[] = ARC_QB_EVENT_INSTRUCTOR3_HEADSHOT_ALT_FID;  // 493
+	// Image and instructor lookup FIDs — hardcoded (stable QB schema, not wp-config).
+	$select = array_merge( $select, array( 464, 466, 482, 483, 484, 486, 487, 491, 492, 493, 494 ) );
 
 	$body = array(
 		'from'   => QB_TABLE_ID,
@@ -213,35 +201,35 @@ function arc_qb_upsert_event( array $record ) {
 	$is_multisession = arc_qb_get_course_field( $record, 454 );
 	update_post_meta( $post_id, '_arc_event_is_multisession', ( $is_multisession && 'false' !== strtolower( (string) $is_multisession ) ) ? '1' : '0' );
 
-	// Image Asset lookup fields.
+	// Image Asset lookup fields — hardcoded FIDs (stable QB schema).
 	update_post_meta( $post_id, '_arc_event_featured_image_url',
-		esc_url_raw( arc_qb_get_course_field( $record, ARC_QB_EVENT_FEATURED_IMAGE_FID ) ) );
+		esc_url_raw( arc_qb_get_course_field( $record, 464 ) ) );
 	update_post_meta( $post_id, '_arc_event_hero_image_url',
-		esc_url_raw( arc_qb_get_course_field( $record, ARC_QB_EVENT_HERO_IMAGE_FID ) ) );
+		esc_url_raw( arc_qb_get_course_field( $record, 466 ) ) );
 
 	// Instructor slot 1.
 	update_post_meta( $post_id, '_arc_event_instructor1_name',
-		sanitize_text_field( arc_qb_get_course_field( $record, ARC_QB_EVENT_INSTRUCTOR1_NAME_FID ) ) );
+		sanitize_text_field( arc_qb_get_course_field( $record, 482 ) ) );
 	update_post_meta( $post_id, '_arc_event_instructor1_headshot_url',
-		esc_url_raw( arc_qb_get_course_field( $record, ARC_QB_EVENT_INSTRUCTOR1_HEADSHOT_FID ) ) );
+		esc_url_raw( arc_qb_get_course_field( $record, 483 ) ) );
 	update_post_meta( $post_id, '_arc_event_instructor1_headshot_alt',
-		sanitize_text_field( arc_qb_get_course_field( $record, ARC_QB_EVENT_INSTRUCTOR1_HEADSHOT_ALT_FID ) ) );
+		sanitize_text_field( arc_qb_get_course_field( $record, 484 ) ) );
 
 	// Instructor slot 2.
 	update_post_meta( $post_id, '_arc_event_instructor2_name',
-		sanitize_text_field( arc_qb_get_course_field( $record, ARC_QB_EVENT_INSTRUCTOR2_NAME_FID ) ) );
+		sanitize_text_field( arc_qb_get_course_field( $record, 486 ) ) );
 	update_post_meta( $post_id, '_arc_event_instructor2_headshot_url',
-		esc_url_raw( arc_qb_get_course_field( $record, ARC_QB_EVENT_INSTRUCTOR2_HEADSHOT_FID ) ) );
+		esc_url_raw( arc_qb_get_course_field( $record, 487 ) ) );
 	update_post_meta( $post_id, '_arc_event_instructor2_headshot_alt',
-		sanitize_text_field( arc_qb_get_course_field( $record, ARC_QB_EVENT_INSTRUCTOR2_HEADSHOT_ALT_FID ) ) );
+		sanitize_text_field( arc_qb_get_course_field( $record, 494 ) ) );
 
 	// Instructor slot 3.
 	update_post_meta( $post_id, '_arc_event_instructor3_name',
-		sanitize_text_field( arc_qb_get_course_field( $record, ARC_QB_EVENT_INSTRUCTOR3_NAME_FID ) ) );
+		sanitize_text_field( arc_qb_get_course_field( $record, 491 ) ) );
 	update_post_meta( $post_id, '_arc_event_instructor3_headshot_url',
-		esc_url_raw( arc_qb_get_course_field( $record, ARC_QB_EVENT_INSTRUCTOR3_HEADSHOT_FID ) ) );
+		esc_url_raw( arc_qb_get_course_field( $record, 492 ) ) );
 	update_post_meta( $post_id, '_arc_event_instructor3_headshot_alt',
-		sanitize_text_field( arc_qb_get_course_field( $record, ARC_QB_EVENT_INSTRUCTOR3_HEADSHOT_ALT_FID ) ) );
+		sanitize_text_field( arc_qb_get_course_field( $record, 493 ) ) );
 
 	return $post_id;
 }

@@ -19,87 +19,25 @@ Add these constants to `wp-config.php` on the WordPress server **before** activa
 | `QB_COURSES_TABLE_ID` | Course Catalog table ID | QB App → Tables → Course Catalog → table ID in URL, e.g. `bc7mmze9m` |
 | `ARC_QB_CACHE_BUST_TOKEN` | Shared secret for Zapier → WP cache invalidation | Generate a strong random string (e.g. `openssl rand -hex 32`); set the same value in both wp-config.php and the Zapier Zap |
 
-### New constants (required for v3.0.0 features)
-
-#### Instructors table
+### New constants (required for v3.0.0)
 
 | Constant | Description | Where to find the value |
 |---|---|---|
 | `QB_INSTRUCTORS_TABLE_ID` | Instructors table ID | QB App → Tables → Instructors → table ID in URL |
-
-#### Image Asset lookup FIDs — Courses
-
-These constants point to lookup fields added to the Courses table by QB Build Spec v3.0. If the QB build has not been applied yet, you can temporarily set these to `0` — the plugin will skip writing those meta keys until they are populated.
-
-| Constant | FID | Description |
-|---|---|---|
-| `ARC_QB_COURSE_FEATURED_IMAGE_FID` | 94 | Courses: Featured Image URL [lookup from Image Assets] |
-| `ARC_QB_COURSE_HERO_IMAGE_FID` | 96 | Courses: Hero Image URL [lookup from Image Assets] |
-
-#### Image Asset lookup FIDs — Events
-
-| Constant | FID | Description |
-|---|---|---|
-| `ARC_QB_EVENT_FEATURED_IMAGE_FID` | 464 | Events: Featured Image URL [lookup from Image Assets] |
-| `ARC_QB_EVENT_HERO_IMAGE_FID` | 466 | Events: Hero Image URL [lookup from Image Assets] |
-
-#### Instructor lookup FIDs on Events (three slots)
-
-| Constant | FID | Description |
-|---|---|---|
-| `ARC_QB_EVENT_INSTRUCTOR1_NAME_FID` | 482 | Instructor 1 - Name |
-| `ARC_QB_EVENT_INSTRUCTOR1_HEADSHOT_FID` | 483 | Instructor 1 - Headshot URL |
-| `ARC_QB_EVENT_INSTRUCTOR1_HEADSHOT_ALT_FID` | 484 | Instructor 1 - Headshot - Alt Text |
-| `ARC_QB_EVENT_INSTRUCTOR2_NAME_FID` | 486 | Instructor 2 - Name |
-| `ARC_QB_EVENT_INSTRUCTOR2_HEADSHOT_FID` | 487 | Instructor 2 - Headshot URL |
-| `ARC_QB_EVENT_INSTRUCTOR2_HEADSHOT_ALT_FID` | 494 | Instructor 2 - Headshot - Alt Text |
-| `ARC_QB_EVENT_INSTRUCTOR3_NAME_FID` | 491 | Instructor 3 - Name |
-| `ARC_QB_EVENT_INSTRUCTOR3_HEADSHOT_FID` | 492 | Instructor 3 - Headshot URL |
-| `ARC_QB_EVENT_INSTRUCTOR3_HEADSHOT_ALT_FID` | 493 | Instructor 3 - Headshot - Alt Text |
-
-#### Instructor profile image (on Instructors table)
-
-| Constant | FID | Description |
-|---|---|---|
-| `ARC_QB_INSTRUCTOR_PROFILE_FID` | 15 | Instructors: Headshot URL [lookup from Image Assets] |
-
-> **Note:** No header image FID for instructors in this version — headshot only.
 
 ### Example wp-config.php block
 
 ```php
 // Arc QB Sync — Quickbase integration
 define( 'QB_REALM_HOST',           'otac.quickbase.com' );
-define( 'QB_TABLE_ID',             'bc7mmze9k' );   // Events table
+define( 'QB_TABLE_ID',             'bc7mmze9k' );   // Training Events table
 define( 'QB_USER_TOKEN',           'your-token-here' );
 define( 'QB_COURSES_TABLE_ID',     'bc7mmze9m' );   // Course Catalog table
 define( 'ARC_QB_CACHE_BUST_TOKEN', 'your-random-secret-here' );
-
-// v3.0.0 — Instructors table
-define( 'QB_INSTRUCTORS_TABLE_ID', 'bvx9ae9x8' );
-
-// v3.0.0 — Image Asset lookup FIDs (Courses)
-define( 'ARC_QB_COURSE_FEATURED_IMAGE_FID', 94  ); // Courses: Featured Image URL [lookup]
-define( 'ARC_QB_COURSE_HERO_IMAGE_FID',     96  ); // Courses: Hero Image URL [lookup]
-
-// v3.0.0 — Image Asset lookup FIDs (Events)
-define( 'ARC_QB_EVENT_FEATURED_IMAGE_FID',  464 ); // Events: Featured Image URL [lookup]
-define( 'ARC_QB_EVENT_HERO_IMAGE_FID',      466 ); // Events: Hero Image URL [lookup]
-
-// v3.0.0 — Instructor lookup FIDs on Events (three slots)
-define( 'ARC_QB_EVENT_INSTRUCTOR1_NAME_FID',         482 );
-define( 'ARC_QB_EVENT_INSTRUCTOR1_HEADSHOT_FID',     483 );
-define( 'ARC_QB_EVENT_INSTRUCTOR1_HEADSHOT_ALT_FID', 484 );
-define( 'ARC_QB_EVENT_INSTRUCTOR2_NAME_FID',         486 );
-define( 'ARC_QB_EVENT_INSTRUCTOR2_HEADSHOT_FID',     487 );
-define( 'ARC_QB_EVENT_INSTRUCTOR2_HEADSHOT_ALT_FID', 494 );
-define( 'ARC_QB_EVENT_INSTRUCTOR3_NAME_FID',         491 );
-define( 'ARC_QB_EVENT_INSTRUCTOR3_HEADSHOT_FID',     492 );
-define( 'ARC_QB_EVENT_INSTRUCTOR3_HEADSHOT_ALT_FID', 493 );
-
-// v3.0.0 — Instructor profile image (Instructors table)
-define( 'ARC_QB_INSTRUCTOR_PROFILE_FID',    15  ); // Instructors: Headshot URL [lookup]
+define( 'QB_INSTRUCTORS_TABLE_ID', 'bvx9ae9x8' );   // Instructors table
 ```
+
+Field IDs (FIDs) are hardcoded in the plugin. No FID constants are required in wp-config.php.
 
 ---
 

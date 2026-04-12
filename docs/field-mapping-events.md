@@ -48,19 +48,19 @@ These shortcodes read from WP post meta on `arc_event` CPT posts. They require t
 | `[arc_event_reg_url]` | `_arc_event_reg_url` | 14 | `esc_url()` |
 | `[arc_event_flyer_url]` | `_arc_event_flyer_url` | 267 | `esc_url()` |
 | `[arc_event_image_url]` | `_arc_event_image_url` | 461 | `esc_url()` — legacy manual field |
-| `[arc_event_featured_image_url]` | `_arc_event_featured_image_url` | `ARC_QB_EVENT_FEATURED_IMAGE_FID` (464) | `esc_url()` — Image Assets lookup |
-| `[arc_event_hero_image_url]` | `_arc_event_hero_image_url` | `ARC_QB_EVENT_HERO_IMAGE_FID` (466) | `esc_url()` — Image Assets lookup |
+| `[arc_event_featured_image_url]` | `_arc_event_featured_image_url` | 464 | `esc_url()` — Image Assets lookup |
+| `[arc_event_hero_image_url]` | `_arc_event_hero_image_url` | 466 | `esc_url()` — Image Assets lookup |
 | `[arc_event_instructors_legacy]` | `_arc_event_instructors_legacy` | 271 | `esc_html()` — legacy manual field |
 | `[arc_event_instructor_slugs_legacy]` | `_arc_event_instructor_slugs_legacy` | 449 | `esc_html()` — pipe-separated, legacy |
-| `[arc_event_instructor1_name]` | `_arc_event_instructor1_name` | `ARC_QB_EVENT_INSTRUCTOR1_NAME_FID` (482) | `esc_html()` |
-| `[arc_event_instructor1_headshot_url]` | `_arc_event_instructor1_headshot_url` | `ARC_QB_EVENT_INSTRUCTOR1_HEADSHOT_FID` (483) | `esc_url()` |
-| `[arc_event_instructor1_headshot_alt]` | `_arc_event_instructor1_headshot_alt` | `ARC_QB_EVENT_INSTRUCTOR1_HEADSHOT_ALT_FID` (484) | `esc_html()` |
-| `[arc_event_instructor2_name]` | `_arc_event_instructor2_name` | `ARC_QB_EVENT_INSTRUCTOR2_NAME_FID` (486) | `esc_html()` |
-| `[arc_event_instructor2_headshot_url]` | `_arc_event_instructor2_headshot_url` | `ARC_QB_EVENT_INSTRUCTOR2_HEADSHOT_FID` (487) | `esc_url()` |
-| `[arc_event_instructor2_headshot_alt]` | `_arc_event_instructor2_headshot_alt` | `ARC_QB_EVENT_INSTRUCTOR2_HEADSHOT_ALT_FID` (494) | `esc_html()` |
-| `[arc_event_instructor3_name]` | `_arc_event_instructor3_name` | `ARC_QB_EVENT_INSTRUCTOR3_NAME_FID` (491) | `esc_html()` |
-| `[arc_event_instructor3_headshot_url]` | `_arc_event_instructor3_headshot_url` | `ARC_QB_EVENT_INSTRUCTOR3_HEADSHOT_FID` (492) | `esc_url()` |
-| `[arc_event_instructor3_headshot_alt]` | `_arc_event_instructor3_headshot_alt` | `ARC_QB_EVENT_INSTRUCTOR3_HEADSHOT_ALT_FID` (493) | `esc_html()` |
+| `[arc_event_instructor1_name]` | `_arc_event_instructor1_name` | 482 | `esc_html()` |
+| `[arc_event_instructor1_headshot_url]` | `_arc_event_instructor1_headshot_url` | 483 | `esc_url()` |
+| `[arc_event_instructor1_headshot_alt]` | `_arc_event_instructor1_headshot_alt` | 484 | `esc_html()` |
+| `[arc_event_instructor2_name]` | `_arc_event_instructor2_name` | 486 | `esc_html()` |
+| `[arc_event_instructor2_headshot_url]` | `_arc_event_instructor2_headshot_url` | 487 | `esc_url()` |
+| `[arc_event_instructor2_headshot_alt]` | `_arc_event_instructor2_headshot_alt` | 494 | `esc_html()` |
+| `[arc_event_instructor3_name]` | `_arc_event_instructor3_name` | 491 | `esc_html()` |
+| `[arc_event_instructor3_headshot_url]` | `_arc_event_instructor3_headshot_url` | 492 | `esc_url()` |
+| `[arc_event_instructor3_headshot_alt]` | `_arc_event_instructor3_headshot_alt` | 493 | `esc_html()` |
 | `[arc_event_is_multiday]` | `_arc_event_is_multiday` | 453 | Returns `"1"` or `"0"` |
 | `[arc_event_is_multisession]` | `_arc_event_is_multisession` | 454 | Returns `"1"` or `"0"` |
 

@@ -21,11 +21,11 @@
 | `ARC_QB_INSTRUCTOR_FID_BIO` | 11 | Bio | `_arc_instructor_bio` | `[arc_instructor_bio]` | `wp_kses_post( wpautop() )` |
 | `ARC_QB_INSTRUCTOR_FID_TITLE` | 12 | Title/Position | `_arc_instructor_title` | `[arc_instructor_title]` | `esc_html()` |
 | `ARC_QB_INSTRUCTOR_FID_ORGANIZATION` | 13 | Organization | `_arc_instructor_organization` | `[arc_instructor_organization]` | `esc_html()` |
-| `ARC_QB_INSTRUCTOR_PROFILE_FID` | 15 | Headshot URL [lookup] | `_arc_instructor_headshot_url` | `[arc_instructor_headshot_url]` | `esc_url()` — from Image Assets table |
+| 15 | 15 | Headshot URL [lookup] | `_arc_instructor_headshot_url` | `[arc_instructor_headshot_url]` | `esc_url()` — from Image Assets table |
 | `ARC_QB_INSTRUCTOR_FID_SLUG` | 27 | slug | `_arc_instructor_slug` + `post_name` | `[arc_instructor_slug]` | `esc_html()` — also drives WP post slug |
 | `ARC_QB_INSTRUCTOR_FID_ACTIVE` | 28 | Active | → `post_status` | *(visibility flag)* | `true` = publish; `false` = draft; sync query filter |
 
-> **Note:** `ARC_QB_INSTRUCTOR_PROFILE_FID` (15) is defined in `wp-config.php`. All other `ARC_QB_INSTRUCTOR_FID_*` constants are defined at the top of `sync-instructors.php`.
+> **Note:** All `ARC_QB_INSTRUCTOR_FID_*` constants are defined at the top of `sync-instructors.php`. FIDs are hardcoded in the plugin — none are required in `wp-config.php`.
 
 > **Note:** No header image FID for instructors in this version — headshot only.
 

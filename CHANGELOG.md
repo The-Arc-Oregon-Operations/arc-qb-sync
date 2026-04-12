@@ -1,5 +1,19 @@
 # Changelog
 
+## [3.1.2] — 2026-04-12
+
+### Fixed
+- Hardcoded all image and instructor lookup FIDs in plugin files; removed dependency on
+  `ARC_QB_COURSE_FEATURED_IMAGE_FID`, `ARC_QB_COURSE_HERO_IMAGE_FID`,
+  `ARC_QB_EVENT_FEATURED_IMAGE_FID`, `ARC_QB_EVENT_HERO_IMAGE_FID`,
+  `ARC_QB_EVENT_INSTRUCTOR*_FID` constants, and `ARC_QB_INSTRUCTOR_PROFILE_FID`
+  from wp-config.php. These constants are no longer read or required.
+  On PHP 8, undefined constants cause a fatal error on load — this was the
+  root cause of the broken build in v3.1.1.
+- Removed `defined()` guards from sync-courses.php image FID calls (no longer needed).
+- Updated docs/setup.md to remove FID constant requirements from wp-config block.
+- Updated field mapping docs to use literal FIDs instead of constant names.
+
 ## [3.1.1] — 2026-04-11
 
 ### Fixed
