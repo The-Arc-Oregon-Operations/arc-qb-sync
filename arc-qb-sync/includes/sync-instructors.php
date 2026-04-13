@@ -26,6 +26,8 @@
  *   15 → _arc_instructor_headshot_url
  *   ARC_QB_INSTRUCTOR_FID_SLUG         (27) → _arc_instructor_slug + post_name
  *   ARC_QB_INSTRUCTOR_FID_ACTIVE       (28) → post_status: publish (TRUE) / draft (FALSE)
+ *   ARC_QB_INSTRUCTOR_FID_PRONOUNS     (29) → _arc_instructor_pronouns
+ *   ARC_QB_INSTRUCTOR_FID_TRAINER_ROLES (31) → _arc_instructor_trainer_roles
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -45,7 +47,9 @@ if ( ! defined( 'ARC_QB_INSTRUCTOR_FID_BIO' ) )          define( 'ARC_QB_INSTRUC
 if ( ! defined( 'ARC_QB_INSTRUCTOR_FID_TITLE' ) )        define( 'ARC_QB_INSTRUCTOR_FID_TITLE',        12 ); // Title/Position
 if ( ! defined( 'ARC_QB_INSTRUCTOR_FID_ORGANIZATION' ) ) define( 'ARC_QB_INSTRUCTOR_FID_ORGANIZATION', 13 ); // Organization
 if ( ! defined( 'ARC_QB_INSTRUCTOR_FID_SLUG' ) )         define( 'ARC_QB_INSTRUCTOR_FID_SLUG',         27 ); // slug (WP post slug)
-if ( ! defined( 'ARC_QB_INSTRUCTOR_FID_ACTIVE' ) )       define( 'ARC_QB_INSTRUCTOR_FID_ACTIVE',       28 ); // Active (checkbox — publish gate)
+if ( ! defined( 'ARC_QB_INSTRUCTOR_FID_ACTIVE' ) )        define( 'ARC_QB_INSTRUCTOR_FID_ACTIVE',        28 ); // Active (checkbox — publish gate)
+if ( ! defined( 'ARC_QB_INSTRUCTOR_FID_PRONOUNS' ) )     define( 'ARC_QB_INSTRUCTOR_FID_PRONOUNS',     29 ); // Pronouns — plain text, stored with parens e.g. (she/her)
+if ( ! defined( 'ARC_QB_INSTRUCTOR_FID_TRAINER_ROLES' ) ) define( 'ARC_QB_INSTRUCTOR_FID_TRAINER_ROLES', 31 ); // Trainer Role(s) — pre-formatted HTML (p, ul, li)
 if ( ! defined( 'ARC_QB_INSTRUCTOR_PROFILE_FID' ) )      define( 'ARC_QB_INSTRUCTOR_PROFILE_FID',      15 ); // Headshot URL [lookup from Image Assets]
 
 // ── QB fetch helpers ──────────────────────────────────────────────────────────
@@ -77,6 +81,8 @@ function arc_qb_fetch_all_instructor_records() {
 		ARC_QB_INSTRUCTOR_PROFILE_FID,      // ARC_QB_INSTRUCTOR_PROFILE_FID
 		ARC_QB_INSTRUCTOR_FID_SLUG,         // 27
 		ARC_QB_INSTRUCTOR_FID_ACTIVE,       // 28
+		ARC_QB_INSTRUCTOR_FID_PRONOUNS,     // 29
+		ARC_QB_INSTRUCTOR_FID_TRAINER_ROLES, // 31
 	);
 
 	$body = array(
@@ -201,6 +207,11 @@ function arc_qb_upsert_instructor( array $record ) {
 	update_post_meta( $post_id, '_arc_instructor_headshot_url',
 		esc_url_raw( arc_qb_get_course_field( $record, ARC_QB_INSTRUCTOR_PROFILE_FID ) ) );
 	update_post_meta( $post_id, '_arc_instructor_slug', $post_name );
+	update_post_meta( $post_id, '_arc_instructor_pronouns',
+		esc_html( arc_qb_get_course_field( $record, ARC_QB_INSTRUCTOR_FID_PRONOUNS ) ) );
+	update_post_meta( $post_id, '_arc_instructor_trainer_roles',
+		wp_kses_post( arc_qb_get_course_field( $record, ARC_QB_INSTRUCTOR_FID_TRAINER_ROLES ) ) );
+	// Note: no wpautop() — content arrives from QB pre-formatted with <p>/<ul> markup.
 
 	return $post_id;
 }

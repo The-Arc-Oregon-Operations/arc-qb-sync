@@ -43,8 +43,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 // These are permanent Quickbase field IDs specific to The Arc Oregon's QB app.
 // They belong in the plugin, not in wp-config.php.
 
-define( 'ARC_QB_COURSE_FEATURED_IMAGE_FID', 94 ); // Courses: Featured Image URL [lookup from Image Assets]
-define( 'ARC_QB_COURSE_HERO_IMAGE_FID',     96 ); // Courses: Hero Image URL [lookup from Image Assets]
+define( 'ARC_QB_COURSE_FEATURED_IMAGE_FID',   94  ); // Courses: Featured Image URL [lookup from Image Assets]
+define( 'ARC_QB_COURSE_HERO_IMAGE_FID',       96  ); // Courses: Hero Image URL [lookup from Image Assets]
+define( 'ARC_QB_COURSE_OFFERS_ONLINE_FID',   109 ); // Offer delivery Online — Checkbox → "1" / "0"
+define( 'ARC_QB_COURSE_OFFERS_INPERSON_FID', 110 ); // Offer delivery In-Person — Checkbox → "1" / "0"
 
 // ── QB fetch helpers ──────────────────────────────────────────────────────────
 
@@ -63,8 +65,10 @@ function arc_qb_fetch_course_record( $record_id ) {
 	}
 
 	$select = array( 3, 6, 14, 20, 36, 39, 40, 43, 46, 50, 56, 62, 84, 85, 88, 89, 90, 92,
-		ARC_QB_COURSE_FEATURED_IMAGE_FID, // 94
-		ARC_QB_COURSE_HERO_IMAGE_FID,     // 96
+		ARC_QB_COURSE_FEATURED_IMAGE_FID,   // 94
+		ARC_QB_COURSE_HERO_IMAGE_FID,       // 96
+		ARC_QB_COURSE_OFFERS_ONLINE_FID,   // 109
+		ARC_QB_COURSE_OFFERS_INPERSON_FID, // 110
 	);
 
 	$body = array(
@@ -110,8 +114,10 @@ function arc_qb_fetch_all_course_records() {
 	}
 
 	$select = array( 3, 6, 14, 20, 36, 39, 40, 43, 46, 50, 56, 62, 84, 85, 88, 89, 90, 92,
-		ARC_QB_COURSE_FEATURED_IMAGE_FID, // 94
-		ARC_QB_COURSE_HERO_IMAGE_FID,     // 96
+		ARC_QB_COURSE_FEATURED_IMAGE_FID,   // 94
+		ARC_QB_COURSE_HERO_IMAGE_FID,       // 96
+		ARC_QB_COURSE_OFFERS_ONLINE_FID,   // 109
+		ARC_QB_COURSE_OFFERS_INPERSON_FID, // 110
 	);
 
 	$body = array(
@@ -255,6 +261,16 @@ function arc_qb_upsert_course( array $record ) {
 	// FID 90 — Use Attribution (checkbox)
 	$use_attribution = arc_qb_get_course_field( $record, 90 );
 	update_post_meta( $post_id, '_arc_course_use_attribution', ( $use_attribution && 'false' !== strtolower( (string) $use_attribution ) ) ? '1' : '0' );
+
+	// FID 109 — Offer delivery Online (checkbox)
+	$offers_online_raw = arc_qb_get_course_field( $record, ARC_QB_COURSE_OFFERS_ONLINE_FID );
+	update_post_meta( $post_id, '_arc_course_offers_online',
+		( true === $offers_online_raw || 'true' === strtolower( (string) $offers_online_raw ) ) ? '1' : '0' );
+
+	// FID 110 — Offer delivery In-Person (checkbox)
+	$offers_inperson_raw = arc_qb_get_course_field( $record, ARC_QB_COURSE_OFFERS_INPERSON_FID );
+	update_post_meta( $post_id, '_arc_course_offers_inperson',
+		( true === $offers_inperson_raw || 'true' === strtolower( (string) $offers_inperson_raw ) ) ? '1' : '0' );
 
 	// FID 92 — Slug for Website (also drives post_name — see $post_data above)
 	update_post_meta( $post_id, '_arc_course_slug', $course_slug );

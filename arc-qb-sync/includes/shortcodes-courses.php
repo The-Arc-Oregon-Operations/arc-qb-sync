@@ -284,6 +284,36 @@ function arc_qb_sc_course_use_attribution() {
 	return esc_html( get_post_meta( $post_id, '_arc_course_use_attribution', true ) );
 }
 
+/**
+ * [course_offers_online] — Whether the course offers online delivery.
+ *
+ * Returns "1" if checked in QB, "0" otherwise.
+ *
+ * @return string "1" or "0".
+ */
+function arc_qb_sc_course_offers_online() {
+	$post_id = arc_qb_get_course_post_id();
+	if ( ! $post_id ) {
+		return '0';
+	}
+	return esc_html( get_post_meta( $post_id, '_arc_course_offers_online', true ) ?: '0' );
+}
+
+/**
+ * [course_offers_inperson] — Whether the course offers in-person delivery.
+ *
+ * Returns "1" if checked in QB, "0" otherwise.
+ *
+ * @return string "1" or "0".
+ */
+function arc_qb_sc_course_offers_inperson() {
+	$post_id = arc_qb_get_course_post_id();
+	if ( ! $post_id ) {
+		return '0';
+	}
+	return esc_html( get_post_meta( $post_id, '_arc_course_offers_inperson', true ) ?: '0' );
+}
+
 /* Learning Objectives — preferred: _arc_course_learning_objectives_html, fallback: _arc_course_learning_objectives */
 function arc_qb_sc_course_learning_objectives() {
 	$post_id = arc_qb_get_course_post_id();
@@ -353,10 +383,12 @@ function arc_qb_shortcode_course_request_url( $atts ) {
  *   85 → _arc_course_learning_objectives (secondary)
  *   88 → _arc_course_image_url
  *   89 → _arc_course_attribution
- *   90 → _arc_course_use_attribution
- *   92 → _arc_course_slug
- *   94 → _arc_course_featured_image_url
- *   96 → _arc_course_hero_image_url
+ *   90  → _arc_course_use_attribution
+ *   92  → _arc_course_slug
+ *   94  → _arc_course_featured_image_url
+ *   96  → _arc_course_hero_image_url
+ *   109 → _arc_course_offers_online
+ *   110 → _arc_course_offers_inperson
  *
  * @param array $atts  Shortcode attributes: id (required), format (text|html).
  * @return string
@@ -399,8 +431,10 @@ function arc_qb_sc_course_field_generic( $atts ) {
 		89 => '_arc_course_attribution',
 		90 => '_arc_course_use_attribution',
 		92 => '_arc_course_slug',
-		94 => '_arc_course_featured_image_url',
-		96 => '_arc_course_hero_image_url',
+		94  => '_arc_course_featured_image_url',
+		96  => '_arc_course_hero_image_url',
+		109 => '_arc_course_offers_online',
+		110 => '_arc_course_offers_inperson',
 		// FID 56 (tags) is intentionally excluded — it is taxonomy-based and not
 		// accessible as a simple meta string; use [course_tags] instead.
 	);
@@ -453,6 +487,8 @@ function arc_qb_register_course_shortcodes() {
 	add_shortcode( 'course_details_url',          'arc_qb_sc_course_details_url' );
 	add_shortcode( 'course_attribution',          'arc_qb_sc_course_attribution' );
 	add_shortcode( 'course_use_attribution',      'arc_qb_sc_course_use_attribution' );
+	add_shortcode( 'course_offers_online',        'arc_qb_sc_course_offers_online' );
+	add_shortcode( 'course_offers_inperson',      'arc_qb_sc_course_offers_inperson' );
 	add_shortcode( 'course_learning_objectives',  'arc_qb_sc_course_learning_objectives' );
 	add_shortcode( 'course_learning_objectives2', 'arc_qb_sc_course_learning_objectives2' );
 	add_shortcode( 'course_request_url',          'arc_qb_shortcode_course_request_url' );

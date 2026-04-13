@@ -1,5 +1,23 @@
 # Changelog
 
+## [3.3.0] — 2026-04-13
+
+### Added
+- Instructors: FID 29 (Pronouns) — synced to `_arc_instructor_pronouns`; shortcode `[instructor_pronouns]`
+- Instructors: FID 31 (Trainer Role(s)) — synced to `_arc_instructor_trainer_roles`; shortcode `[instructor_trainer_roles]`
+- Courses: FID 109 (Offer delivery Online) — synced to `_arc_course_offers_online`; shortcode `[course_offers_online]`
+- Courses: FID 110 (Offer delivery In-Person) — synced to `_arc_course_offers_inperson`; shortcode `[course_offers_inperson]`
+
+### Fixed
+- `[instructor_bio]` shortcode no longer applies `wpautop()` to bio content that arrives pre-formatted from QB
+- Generic instructor field shortcode (`[arc_instructor_field format="html"]`) likewise no longer double-applies `wpautop()`
+
+### Docs
+- `docs/field-mapping-instructors.md`: added FID 29 and FID 31; notes on pre-formatted HTML fields and concatenated Instructor Name
+- `docs/field-mapping-courses.md`: added FID 109 and FID 110; updated synced FID list and generic shortcode map
+
+---
+
 ## [3.2.1] — 2026-04-12
 
 ### Fixed
