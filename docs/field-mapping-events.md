@@ -41,6 +41,7 @@ These shortcodes read from WP post meta on `arc_event` CPT posts. They require t
 | `[arc_event_time]` | `_arc_event_time` | 89 | `esc_html()` |
 | `[arc_event_venue]` | `_arc_event_venue` | 29 | `esc_html()` |
 | `[arc_event_days_of_week]` | `_arc_event_days_of_week` | 413 | `esc_html()` |
+| `[event_schedule]` | `_arc_event_schedule` | computed | Computed from FIDs 413 + 45, separated by ` • `. `esc_html()` |
 | `[arc_event_mode]` | `_arc_event_mode` | 458 | `esc_html()` |
 | `[arc_event_length]` | `_arc_event_length` | 361 | `esc_html()` |
 | `[arc_event_description]` | `_arc_event_description` | 440 | `wp_kses_post( wpautop() )` |
@@ -52,15 +53,15 @@ These shortcodes read from WP post meta on `arc_event` CPT posts. They require t
 | `[arc_event_hero_image_url]` | `_arc_event_hero_image_url` | 466 | `esc_url()` — Image Assets lookup |
 | `[arc_event_instructors_legacy]` | `_arc_event_instructors_legacy` | 271 | `esc_html()` — legacy manual field |
 | `[arc_event_instructor_slugs_legacy]` | `_arc_event_instructor_slugs_legacy` | 449 | `esc_html()` — pipe-separated, legacy |
-| `[arc_event_instructor1_name]` | `_arc_event_instructor1_name` | 482 | `esc_html()` |
-| `[arc_event_instructor1_headshot_url]` | `_arc_event_instructor1_headshot_url` | 483 | `esc_url()` |
-| `[arc_event_instructor1_headshot_alt]` | `_arc_event_instructor1_headshot_alt` | 484 | `esc_html()` |
-| `[arc_event_instructor2_name]` | `_arc_event_instructor2_name` | 486 | `esc_html()` |
-| `[arc_event_instructor2_headshot_url]` | `_arc_event_instructor2_headshot_url` | 487 | `esc_url()` |
-| `[arc_event_instructor2_headshot_alt]` | `_arc_event_instructor2_headshot_alt` | 494 | `esc_html()` |
-| `[arc_event_instructor3_name]` | `_arc_event_instructor3_name` | 491 | `esc_html()` |
-| `[arc_event_instructor3_headshot_url]` | `_arc_event_instructor3_headshot_url` | 492 | `esc_url()` |
-| `[arc_event_instructor3_headshot_alt]` | `_arc_event_instructor3_headshot_alt` | 493 | `esc_html()` |
+| *(removed v3.5.0)* | `_arc_event_instructor1_name` | 482 | Removed — never deployed in live templates |
+| *(removed v3.5.0)* | `_arc_event_instructor1_headshot_url` | 483 | Removed — never deployed in live templates |
+| *(removed v3.5.0)* | `_arc_event_instructor1_headshot_alt` | 484 | Removed — never deployed in live templates |
+| *(removed v3.5.0)* | `_arc_event_instructor2_name` | 486 | Removed — never deployed in live templates |
+| *(removed v3.5.0)* | `_arc_event_instructor2_headshot_url` | 487 | Removed — never deployed in live templates |
+| *(removed v3.5.0)* | `_arc_event_instructor2_headshot_alt` | 494 | Removed — never deployed in live templates |
+| *(removed v3.5.0)* | `_arc_event_instructor3_name` | 491 | Removed — never deployed in live templates |
+| *(removed v3.5.0)* | `_arc_event_instructor3_headshot_url` | 492 | Removed — never deployed in live templates |
+| *(removed v3.5.0)* | `_arc_event_instructor3_headshot_alt` | 493 | Removed — never deployed in live templates |
 | `[arc_event_is_multiday]` | `_arc_event_is_multiday` | 453 | Returns `"1"` or `"0"` |
 | `[arc_event_is_multisession]` | `_arc_event_is_multisession` | 454 | Returns `"1"` or `"0"` |
 

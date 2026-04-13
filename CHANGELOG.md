@@ -1,5 +1,17 @@
 # Changelog
 
+## [3.5.0] — 2026-04-12
+
+### Added
+- `_arc_event_schedule` computed meta field: days_of_week + ` • ` + dates (FIDs 413 + 45); stored on every event sync; `array_filter` omits bullet if either value is empty
+- `[event_schedule]` shortcode reads `_arc_event_schedule` from post meta; no deprecated alias (new field)
+- `includes/elementor-queries.php`: Elementor Pro Loop Grid custom query hook `arc_event_instructors` — queries `instructor` CPT posts whose slugs match `_arc_event_instructor_slugs_legacy` on the current `arc_event`; set Loop Grid → Query → Query ID to `arc_event_instructors`
+
+### Removed
+- Instructor slot fields (instructor1/2/3 name, headshot URL, headshot alt) removed from sync and shortcodes — 9 meta fields, 18 `add_shortcode` calls, 9 callbacks, 9 `define()` constants — never deployed in any live template; cleanly cut
+
+---
+
 ## [3.3.0] — 2026-04-13
 
 ### Added

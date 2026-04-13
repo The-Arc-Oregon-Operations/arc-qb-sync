@@ -31,36 +31,19 @@
  *   461 → _arc_event_image_url (legacy manual field)
  *   464 → _arc_event_featured_image_url
  *   466 → _arc_event_hero_image_url
- *   482 → _arc_event_instructor1_name
- *   483 → _arc_event_instructor1_headshot_url
- *   484 → _arc_event_instructor1_headshot_alt
- *   486 → _arc_event_instructor2_name
- *   487 → _arc_event_instructor2_headshot_url
- *   494 → _arc_event_instructor2_headshot_alt
- *   491 → _arc_event_instructor3_name
- *   492 → _arc_event_instructor3_headshot_url
- *   493 → _arc_event_instructor3_headshot_alt
+ *   computed → _arc_event_schedule (FIDs 413 + 45 concatenated with ' • ')
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-// ── FID constants — Events image lookups and instructor slots ─────────────────
+// ── FID constants — Events image lookups ──────────────────────────────────────
 // These are permanent Quickbase field IDs specific to The Arc Oregon's QB app.
 // They belong in the plugin, not in wp-config.php.
 
-define( 'ARC_QB_EVENT_FEATURED_IMAGE_FID',           464 ); // Events: Featured Image URL [lookup from Image Assets]
-define( 'ARC_QB_EVENT_HERO_IMAGE_FID',               466 ); // Events: Hero Image URL [lookup from Image Assets]
-define( 'ARC_QB_EVENT_INSTRUCTOR1_NAME_FID',         482 ); // Instructor 1 - Name
-define( 'ARC_QB_EVENT_INSTRUCTOR1_HEADSHOT_FID',     483 ); // Instructor 1 - Headshot URL
-define( 'ARC_QB_EVENT_INSTRUCTOR1_HEADSHOT_ALT_FID', 484 ); // Instructor 1 - Headshot Alt Text
-define( 'ARC_QB_EVENT_INSTRUCTOR2_NAME_FID',         486 ); // Instructor 2 - Name
-define( 'ARC_QB_EVENT_INSTRUCTOR2_HEADSHOT_FID',     487 ); // Instructor 2 - Headshot URL
-define( 'ARC_QB_EVENT_INSTRUCTOR2_HEADSHOT_ALT_FID', 494 ); // Instructor 2 - Headshot Alt Text
-define( 'ARC_QB_EVENT_INSTRUCTOR3_NAME_FID',         491 ); // Instructor 3 - Name
-define( 'ARC_QB_EVENT_INSTRUCTOR3_HEADSHOT_FID',     492 ); // Instructor 3 - Headshot URL
-define( 'ARC_QB_EVENT_INSTRUCTOR3_HEADSHOT_ALT_FID', 493 ); // Instructor 3 - Headshot Alt Text
+define( 'ARC_QB_EVENT_FEATURED_IMAGE_FID', 464 ); // Events: Featured Image URL [lookup from Image Assets]
+define( 'ARC_QB_EVENT_HERO_IMAGE_FID',     466 ); // Events: Hero Image URL [lookup from Image Assets]
 
 // ── QB fetch helpers ──────────────────────────────────────────────────────────
 
@@ -84,8 +67,8 @@ function arc_qb_fetch_all_event_records() {
 	// Base fields — always included.
 	$select = array( 3, 14, 19, 29, 45, 89, 137, 267, 271, 361, 413, 440, 449, 450, 453, 454, 458, 461 );
 
-	// Image and instructor lookup FIDs — hardcoded (stable QB schema, not wp-config).
-	$select = array_merge( $select, array( 464, 466, 482, 483, 484, 486, 487, 491, 492, 493, 494 ) );
+	// Image lookup FIDs — hardcoded (stable QB schema, not wp-config).
+	$select = array_merge( $select, array( 464, 466 ) );
 
 	$body = array(
 		'from'   => QB_TABLE_ID,
@@ -188,12 +171,20 @@ function arc_qb_upsert_event( array $record ) {
 	update_post_meta( $post_id, '_arc_qb_event_id',                  $qb_event_id );
 	update_post_meta( $post_id, '_arc_event_reg_url',                esc_url_raw( arc_qb_get_course_field( $record, 14 ) ) );
 	update_post_meta( $post_id, '_arc_event_venue',                  sanitize_text_field( arc_qb_get_course_field( $record, 29 ) ) );
-	update_post_meta( $post_id, '_arc_event_dates',                  sanitize_text_field( arc_qb_get_course_field( $record, 45 ) ) );
+	$event_dates    = sanitize_text_field( arc_qb_get_course_field( $record, 45 ) );
+	$days_of_week   = sanitize_text_field( arc_qb_get_course_field( $record, 413 ) );
+
+	update_post_meta( $post_id, '_arc_event_dates',        $event_dates );
+	update_post_meta( $post_id, '_arc_event_days_of_week', $days_of_week );
+
+	// Concatenated schedule display string.
+	$parts = array_filter( array( $days_of_week, $event_dates ) );
+	update_post_meta( $post_id, '_arc_event_schedule', implode( ' • ', $parts ) );
+
 	update_post_meta( $post_id, '_arc_event_time',                   sanitize_text_field( arc_qb_get_course_field( $record, 89 ) ) );
 	update_post_meta( $post_id, '_arc_event_flyer_url',              esc_url_raw( arc_qb_get_course_field( $record, 267 ) ) );
 	update_post_meta( $post_id, '_arc_event_instructors_legacy',     sanitize_text_field( arc_qb_get_course_field( $record, 271 ) ) );
 	update_post_meta( $post_id, '_arc_event_length',                 sanitize_text_field( arc_qb_get_course_field( $record, 361 ) ) );
-	update_post_meta( $post_id, '_arc_event_days_of_week',           sanitize_text_field( arc_qb_get_course_field( $record, 413 ) ) );
 	update_post_meta( $post_id, '_arc_event_description',            wp_kses_post( arc_qb_get_course_field( $record, 440 ) ) );
 	update_post_meta( $post_id, '_arc_event_instructor_slugs_legacy', sanitize_text_field( arc_qb_get_course_field( $record, 449 ) ) );
 	update_post_meta( $post_id, '_arc_event_mode',                   sanitize_text_field( arc_qb_get_course_field( $record, 458 ) ) );
@@ -222,30 +213,6 @@ function arc_qb_upsert_event( array $record ) {
 	update_post_meta( $post_id, '_arc_event_featured_image_url', $event_featured_image_url );
 	update_post_meta( $post_id, '_arc_event_hero_image_url',
 		esc_url_raw( arc_qb_get_course_field( $record, 466 ) ) );
-
-	// Instructor slot 1.
-	update_post_meta( $post_id, '_arc_event_instructor1_name',
-		sanitize_text_field( arc_qb_get_course_field( $record, 482 ) ) );
-	update_post_meta( $post_id, '_arc_event_instructor1_headshot_url',
-		esc_url_raw( arc_qb_get_course_field( $record, 483 ) ) );
-	update_post_meta( $post_id, '_arc_event_instructor1_headshot_alt',
-		sanitize_text_field( arc_qb_get_course_field( $record, 484 ) ) );
-
-	// Instructor slot 2.
-	update_post_meta( $post_id, '_arc_event_instructor2_name',
-		sanitize_text_field( arc_qb_get_course_field( $record, 486 ) ) );
-	update_post_meta( $post_id, '_arc_event_instructor2_headshot_url',
-		esc_url_raw( arc_qb_get_course_field( $record, 487 ) ) );
-	update_post_meta( $post_id, '_arc_event_instructor2_headshot_alt',
-		sanitize_text_field( arc_qb_get_course_field( $record, 494 ) ) );
-
-	// Instructor slot 3.
-	update_post_meta( $post_id, '_arc_event_instructor3_name',
-		sanitize_text_field( arc_qb_get_course_field( $record, 491 ) ) );
-	update_post_meta( $post_id, '_arc_event_instructor3_headshot_url',
-		esc_url_raw( arc_qb_get_course_field( $record, 492 ) ) );
-	update_post_meta( $post_id, '_arc_event_instructor3_headshot_alt',
-		sanitize_text_field( arc_qb_get_course_field( $record, 493 ) ) );
 
 	// ── Featured image ────────────────────────────────────────────────────────
 	arc_qb_sync_set_featured_image( $post_id, $event_featured_image_url );
