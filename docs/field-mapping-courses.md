@@ -4,7 +4,7 @@
 **Realm:** `otac.quickbase.com`
 **Table ID:** `bc7mmze9m` (set via `QB_COURSES_TABLE_ID` constant)
 
-**Synced FIDs:** 3, 6, 14, 20, 36, 39, 40, 43, 46, 50, 56, 62, 84, 85, 88, 89, 90, 92, 94, 96
+**Synced FIDs:** 3, 6, 14, 20, 36, 39, 40, 43, 46, 50, 56, 62, 84, 85, 88, 89, 90, 92, 94, 96, 109, 110
 
 ---
 
@@ -32,6 +32,8 @@
 | 92 | Slug for Website | `_arc_course_slug` + `post_name` | `[course_field id="92"]` | Drives `post_name` on insert and update; QB-managed stable URL slug |
 | 94 | Featured Image URL | `_arc_course_featured_image_url` | `[course_featured_image_url]` / `[course_field id="94"]` | Lookup from Image Assets table; preferred over FID 88 for new templates |
 | 96 | Hero Image URL | `_arc_course_hero_image_url` | `[course_hero_image_url]` / `[course_field id="96"]` | Lookup from Image Assets table |
+| 109 | Offer delivery Online | `_arc_course_offers_online` | `[course_offers_online]` | Checkbox → `"1"` or `"0"` |
+| 110 | Offer delivery In-Person | `_arc_course_offers_inperson` | `[course_offers_inperson]` | Checkbox → `"1"` or `"0"` |
 
 ---
 
@@ -55,7 +57,7 @@ Any synced field can be accessed by QB field ID:
 - `format="text"` (default) — `esc_html()`
 - `format="html"` — `wp_kses_post( wpautop() )`
 
-**Supported IDs:** 3, 6, 14, 20, 39, 40, 43, 46, 50, 62, 84, 85, 88, 89, 90, 92, 94, 96
+**Supported IDs:** 3, 6, 14, 20, 39, 40, 43, 46, 50, 62, 84, 85, 88, 89, 90, 92, 94, 96, 109, 110
 
 **Not supported via `[course_field]`:** FID 56 (tags) — taxonomy-based, use `[course_tags]` instead.
 
