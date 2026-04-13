@@ -232,6 +232,8 @@ function arc_qb_upsert_course( array $record ) {
 	// ── Update post meta ──────────────────────────────────────────────────────
 
 	update_post_meta( $post_id, '_arc_qb_record_id',                    $qb_record_id );
+	update_post_meta( $post_id, '_arc_course_request_url',
+		esc_url_raw( 'https://thearcoregon.org/organization-training-request/?course=' . $qb_record_id ) );
 	update_post_meta( $post_id, '_arc_course_length_ms',                $length_ms_raw );
 	update_post_meta( $post_id, '_arc_course_length',                   arc_qb_format_duration( $length_ms_raw ) );
 	update_post_meta( $post_id, '_arc_course_base_rate',                sanitize_text_field( arc_qb_get_course_field( $record, 39 ) ) );
@@ -243,8 +245,8 @@ function arc_qb_upsert_course( array $record ) {
 	update_post_meta( $post_id, '_arc_course_image_url',                esc_url_raw( arc_qb_get_course_field( $record, 88 ) ) );
 
 	// Image Asset lookup fields
-	update_post_meta( $post_id, '_arc_course_featured_image_url',
-		esc_url_raw( arc_qb_get_course_field( $record, ARC_QB_COURSE_FEATURED_IMAGE_FID ) ) ); // 94
+	$course_featured_image_url = esc_url_raw( arc_qb_get_course_field( $record, ARC_QB_COURSE_FEATURED_IMAGE_FID ) ); // 94
+	update_post_meta( $post_id, '_arc_course_featured_image_url', $course_featured_image_url );
 	update_post_meta( $post_id, '_arc_course_hero_image_url',
 		esc_url_raw( arc_qb_get_course_field( $record, ARC_QB_COURSE_HERO_IMAGE_FID ) ) );     // 96
 
@@ -286,6 +288,9 @@ function arc_qb_upsert_course( array $record ) {
 	// Build comma-separated slug string for Elementor data-tags attribute.
 	$tag_slugs = implode( ',', array_map( 'sanitize_title', $tag_names ) );
 	update_post_meta( $post_id, '_course_tag_slugs', $tag_slugs );
+
+	// ── Featured image ────────────────────────────────────────────────────────
+	arc_qb_sync_set_featured_image( $post_id, $course_featured_image_url );
 
 	return $post_id;
 }

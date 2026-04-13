@@ -218,8 +218,8 @@ function arc_qb_upsert_event( array $record ) {
 	update_post_meta( $post_id, '_arc_event_is_multisession', ( $is_multisession && 'false' !== strtolower( (string) $is_multisession ) ) ? '1' : '0' );
 
 	// Image Asset lookup fields — hardcoded FIDs (stable QB schema).
-	update_post_meta( $post_id, '_arc_event_featured_image_url',
-		esc_url_raw( arc_qb_get_course_field( $record, 464 ) ) );
+	$event_featured_image_url = esc_url_raw( arc_qb_get_course_field( $record, 464 ) );
+	update_post_meta( $post_id, '_arc_event_featured_image_url', $event_featured_image_url );
 	update_post_meta( $post_id, '_arc_event_hero_image_url',
 		esc_url_raw( arc_qb_get_course_field( $record, 466 ) ) );
 
@@ -246,6 +246,9 @@ function arc_qb_upsert_event( array $record ) {
 		esc_url_raw( arc_qb_get_course_field( $record, 492 ) ) );
 	update_post_meta( $post_id, '_arc_event_instructor3_headshot_alt',
 		sanitize_text_field( arc_qb_get_course_field( $record, 493 ) ) );
+
+	// ── Featured image ────────────────────────────────────────────────────────
+	arc_qb_sync_set_featured_image( $post_id, $event_featured_image_url );
 
 	return $post_id;
 }

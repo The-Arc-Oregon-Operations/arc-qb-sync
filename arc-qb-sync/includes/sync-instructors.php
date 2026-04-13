@@ -204,14 +204,17 @@ function arc_qb_upsert_instructor( array $record ) {
 		sanitize_text_field( arc_qb_get_course_field( $record, ARC_QB_INSTRUCTOR_FID_TITLE ) ) );
 	update_post_meta( $post_id, '_arc_instructor_organization',
 		sanitize_text_field( arc_qb_get_course_field( $record, ARC_QB_INSTRUCTOR_FID_ORGANIZATION ) ) );
-	update_post_meta( $post_id, '_arc_instructor_headshot_url',
-		esc_url_raw( arc_qb_get_course_field( $record, ARC_QB_INSTRUCTOR_PROFILE_FID ) ) );
+	$headshot_url = esc_url_raw( arc_qb_get_course_field( $record, ARC_QB_INSTRUCTOR_PROFILE_FID ) );
+	update_post_meta( $post_id, '_arc_instructor_headshot_url', $headshot_url );
 	update_post_meta( $post_id, '_arc_instructor_slug', $post_name );
 	update_post_meta( $post_id, '_arc_instructor_pronouns',
 		esc_html( arc_qb_get_course_field( $record, ARC_QB_INSTRUCTOR_FID_PRONOUNS ) ) );
 	update_post_meta( $post_id, '_arc_instructor_trainer_roles',
 		wp_kses_post( arc_qb_get_course_field( $record, ARC_QB_INSTRUCTOR_FID_TRAINER_ROLES ) ) );
 	// Note: no wpautop() — content arrives from QB pre-formatted with <p>/<ul> markup.
+
+	// ── Featured image ────────────────────────────────────────────────────────
+	arc_qb_sync_set_featured_image( $post_id, $headshot_url );
 
 	return $post_id;
 }

@@ -98,6 +98,39 @@ function arc_qb_parse_tags( $raw ) {
 }
 
 /**
+ * Set or clear the WP featured image (post thumbnail) from a media library URL.
+ *
+ * Called after each CPT upsert to keep the featured image in sync with the
+ * image URL stored in QB. Because QB image URLs are sourced from the WP media
+ * library, we resolve the URL to an attachment ID via attachment_url_to_postid().
+ *
+ * Query strings are stripped before lookup — WP media URLs sometimes carry a
+ * cache-busting suffix (e.g. ?x92091) that would cause the lookup to miss.
+ *
+ * If $url is empty, or the URL cannot be matched to a media attachment, the
+ * featured image is actively cleared so stale thumbnails don't persist.
+ *
+ * @param int    $post_id  WP post ID of the CPT post to update.
+ * @param string $url      Raw image URL from QB (may include query string).
+ * @return void
+ */
+function arc_qb_sync_set_featured_image( $post_id, $url ) {
+	// Strip query string before lookup.
+	$clean_url = $url ? strtok( (string) $url, '?' ) : '';
+
+	if ( $clean_url ) {
+		$attachment_id = attachment_url_to_postid( $clean_url );
+		if ( $attachment_id ) {
+			set_post_thumbnail( $post_id, $attachment_id );
+			return;
+		}
+	}
+
+	// URL empty or not found in media library — clear any existing thumbnail.
+	delete_post_thumbnail( $post_id );
+}
+
+/**
  * Format a Quickbase Duration field value (milliseconds) as a human-readable
  * hours string, e.g. 23400000 → "6.5 hours".
  *
