@@ -167,11 +167,16 @@ function arc_qb_upsert_instructor( array $record ) {
 
 	// ── Build WP post array (active instructors only) ─────────────────────────
 
+	// Extract bio once — used for both post_excerpt and _arc_instructor_bio meta.
+	$bio_raw     = arc_qb_get_course_field( $record, ARC_QB_INSTRUCTOR_FID_BIO );
+	$bio_excerpt = wp_trim_words( wp_strip_all_tags( $bio_raw ), 30, '…' );
+
 	$post_data = array(
-		'post_type'   => 'instructor',
-		'post_title'  => sanitize_text_field( $name ),
-		'post_status' => 'publish',
-		'post_name'   => $post_name,
+		'post_type'    => 'instructor',
+		'post_title'   => sanitize_text_field( $name ),
+		'post_status'  => 'publish',
+		'post_name'    => $post_name,
+		'post_excerpt' => $bio_excerpt,
 	);
 
 	if ( $post_id > 0 ) {
@@ -198,8 +203,7 @@ function arc_qb_upsert_instructor( array $record ) {
 		esc_url_raw( arc_qb_get_course_field( $record, ARC_QB_INSTRUCTOR_FID_CONTACT_URL ) ) );
 	update_post_meta( $post_id, '_arc_instructor_credentials',
 		sanitize_text_field( arc_qb_get_course_field( $record, ARC_QB_INSTRUCTOR_FID_CREDENTIALS ) ) );
-	update_post_meta( $post_id, '_arc_instructor_bio',
-		wp_kses_post( arc_qb_get_course_field( $record, ARC_QB_INSTRUCTOR_FID_BIO ) ) );
+	update_post_meta( $post_id, '_arc_instructor_bio', wp_kses_post( $bio_raw ) );
 	update_post_meta( $post_id, '_arc_instructor_title',
 		sanitize_text_field( arc_qb_get_course_field( $record, ARC_QB_INSTRUCTOR_FID_TITLE ) ) );
 	update_post_meta( $post_id, '_arc_instructor_organization',

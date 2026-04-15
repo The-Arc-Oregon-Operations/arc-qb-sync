@@ -31,7 +31,7 @@ function arc_qb_register_instructor_cpt() {
 			),
 			'public'         => true,
 			'show_in_rest'   => true,
-			'supports'       => array( 'title', 'editor', 'thumbnail', 'custom-fields' ),
+			'supports'       => array( 'title', 'editor', 'excerpt', 'thumbnail', 'custom-fields' ),
 			'has_archive'    => false,
 			'rewrite'        => array( 'slug' => 'instructor' ),
 			'menu_icon'      => 'dashicons-groups',
