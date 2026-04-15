@@ -37,7 +37,7 @@ function arc_qb_register_event_cpt() {
 			'show_in_rest'   => true,
 			'supports'       => array( 'title', 'editor', 'thumbnail', 'custom-fields' ),
 			'has_archive'    => false,
-			'rewrite'        => array( 'slug' => 'training' ),
+			'rewrite'        => array( 'slug' => 'events' ),
 			'menu_icon'      => 'dashicons-calendar-alt',
 		)
 	);
