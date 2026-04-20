@@ -178,12 +178,12 @@ class Arc_QB_Course_Meta_Tag extends \Elementor\Core\DynamicTags\Tag {
 	private function get_fields_map(): array {
 		return array(
 			'title'               => array( __( 'Course title', 'arc-qb-sync' ),                                  '[course_title]' ),
-			'short_description'   => array( __( 'Short description (HTML)', 'arc-qb-sync' ),                      '[course_short_description]' ),
-			'learning_objectives' => array( __( 'Learning objectives / full description (HTML)', 'arc-qb-sync' ), '[course_learning_objectives]' ),
-			'length'              => array( __( 'Length (formatted, e.g. "6.5 hours")', 'arc-qb-sync' ),          '[course_length]' ),
-			'hours'               => array( __( 'Hours (numeric)', 'arc-qb-sync' ),                               '[course_hours]' ),
-			'delivery_method'     => array( __( 'Delivery method', 'arc-qb-sync' ),                               '[course_delivery_method]' ),
-			'target_audience'     => array( __( 'Target audience (HTML)', 'arc-qb-sync' ),                        '[course_target_audience]' ),
+			'short_description'   => array( __( 'Description (HTML)', 'arc-qb-sync' ),       '[course_short_description]' ),
+			'learning_objectives' => array( __( 'Learning Obj (HTML)', 'arc-qb-sync' ),    '[course_learning_objectives]' ),
+			'length'              => array( __( 'Length', 'arc-qb-sync' ),                 '[course_length]' ),
+			'hours'               => array( __( 'Hours', 'arc-qb-sync' ),                  '[course_hours]' ),
+			'delivery_method'     => array( __( 'Delivery method', 'arc-qb-sync' ),        '[course_delivery_method]' ),
+			'target_audience'     => array( __( 'Target Audience (HTML)', 'arc-qb-sync' ), '[course_target_audience]' ),
 			'category'            => array( __( 'Category', 'arc-qb-sync' ),                                      '[course_category]' ),
 			'base_rate'           => array( __( 'Base rate', 'arc-qb-sync' ),                                     '[course_base_rate]' ),
 			'details_url'         => array( __( 'Course details URL', 'arc-qb-sync' ),                            '[course_details_url]' ),
@@ -191,7 +191,7 @@ class Arc_QB_Course_Meta_Tag extends \Elementor\Core\DynamicTags\Tag {
 			'attribution'         => array( __( 'Attribution', 'arc-qb-sync' ),                                   '[course_attribution]' ),
 			'featured_image_url'  => array( __( 'Featured image URL', 'arc-qb-sync' ),                            '[course_featured_image_url]' ),
 			'hero_image_url'      => array( __( 'Hero image URL', 'arc-qb-sync' ),                                '[course_hero_image_url]' ),
-			'tags'                => array( __( 'Tags (HTML pill spans)', 'arc-qb-sync' ),                         '[course_tags]' ),
+			'tags'                => array( __( 'Tags', 'arc-qb-sync' ),                    '[course_tags]' ),
 		);
 	}
 
@@ -269,13 +269,12 @@ class Arc_QB_Instructor_Meta_Tag extends \Elementor\Core\DynamicTags\Tag {
 			'first_name'    => array( __( 'First name', 'arc-qb-sync' ),             '[instructor_first_name]' ),
 			'last_name'     => array( __( 'Last name', 'arc-qb-sync' ),              '[instructor_last_name]' ),
 			'pronouns'      => array( __( 'Pronouns', 'arc-qb-sync' ),               '[instructor_pronouns]' ),
-			'title'         => array( __( 'Title / position', 'arc-qb-sync' ),       '[instructor_title]' ),
+			'title'         => array( __( 'Title', 'arc-qb-sync' ),                    '[instructor_title]' ),
 			'organization'  => array( __( 'Organization', 'arc-qb-sync' ),           '[instructor_organization]' ),
 			'credentials'   => array( __( 'Credentials', 'arc-qb-sync' ),            '[instructor_credentials]' ),
 			'bio'           => array( __( 'Bio (HTML)', 'arc-qb-sync' ),             '[instructor_bio]' ),
 			'trainer_roles' => array( __( 'Trainer role(s) (HTML)', 'arc-qb-sync' ), '[instructor_trainer_roles]' ),
 			'headshot_url'  => array( __( 'Headshot image URL', 'arc-qb-sync' ),     '[instructor_headshot_url]' ),
-			'contact_url'   => array( __( 'Contact URL', 'arc-qb-sync' ),            '[instructor_contact_url]' ),
 		);
 	}
 

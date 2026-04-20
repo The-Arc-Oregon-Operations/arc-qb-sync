@@ -1,5 +1,14 @@
 # Changelog
 
+## [3.6.2] — 2026-04-20
+
+### Changed
+- `elementor-dynamic-tags.php`: Elementor dropdown labels cleaned up after human review of the field reference doc
+  - Course Meta: `Short description (HTML)` → `Description (HTML)`; `Learning objectives / full description (HTML)` → `Learning Obj (HTML)`; `Length (formatted, e.g. "6.5 hours")` → `Length`; `Hours (numeric)` → `Hours`; `Target audience (HTML)` → `Target Audience (HTML)`; `Tags (HTML pill spans)` → `Tags`
+  - Instructor Meta: `Title / position` → `Title`; `contact_url` entry removed (field not yet implemented — will be re-added in a future release)
+
+---
+
 ## [3.6.0] — 2026-04-20
 
 ### Added
