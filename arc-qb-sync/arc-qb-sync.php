@@ -2,7 +2,7 @@
 /**
  * Plugin Name:  Arc Oregon QB Sync
  * Description:  Integrates Quickbase with WordPress for The Arc Oregon. Syncs Course Catalog records as Custom Post Types and provides shortcodes for event detail pages.
- * Version:      3.5.2
+ * Version:      3.6.0
  * Author:       Alan Lytle at The Arc Oregon
  */
 
@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'ARC_QB_SYNC_VERSION', '3.5.2' );
+define( 'ARC_QB_SYNC_VERSION', '3.6.0' );
 define( 'ARC_QB_SYNC_DIR', plugin_dir_path( __FILE__ ) );
 define( 'ARC_QB_SYNC_URL', plugin_dir_url( __FILE__ ) );
 
@@ -37,6 +37,7 @@ require_once ARC_QB_SYNC_DIR . 'includes/cpt-events.php';            // arc_even
 require_once ARC_QB_SYNC_DIR . 'includes/sync-events.php';           // Events upsert engine, full sync, admin UI
 require_once ARC_QB_SYNC_DIR . 'includes/shortcodes-events-cpt.php'; // [arc_event_*] shortcodes (WP meta)
 require_once ARC_QB_SYNC_DIR . 'includes/elementor-queries.php';      // Elementor Loop Grid custom query hooks
+require_once ARC_QB_SYNC_DIR . 'includes/elementor-dynamic-tags.php'; // Elementor dynamic tags for CPT field dropdowns
 
 // ── Instructors CPT ───────────────────────────────────────────────────────────
 

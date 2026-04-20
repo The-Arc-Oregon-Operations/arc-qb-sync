@@ -1,6 +1,10 @@
 # Elementor Custom Field Keys — arc-qb-sync CPTs
 
-When using Elementor Pro's **Post Custom Field** dynamic tag, enter the meta key directly in the **Custom Key** field. These keys are hidden fields (underscore-prefixed) and will not appear in the dropdown — type them in manually.
+> **As of v3.6.0:** You no longer need to type meta keys manually. The plugin now registers three custom Elementor dynamic tags — **Event Meta**, **Course Meta**, and **Instructor Meta** — visible in the "Post" group of Elementor's dynamic tag picker. Each tag has a labeled **Field** dropdown covering all user-facing fields. The manual key reference below is kept for edge cases or `[shortcode]` usage outside Elementor.
+
+---
+
+When using Elementor Pro's **Post Custom Field** dynamic tag directly, enter the meta key in the **Custom Key** field. These keys are hidden fields (underscore-prefixed) and will not appear in Elementor's standard dropdown — type them in manually.
 
 For fields that come from the post itself (title, excerpt), use the corresponding Elementor built-in dynamic tag instead (Post Title, Post Excerpt), as noted below.
 

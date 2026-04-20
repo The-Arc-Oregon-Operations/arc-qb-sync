@@ -296,15 +296,16 @@ function arc_qb_sync_all_instructors() {
 	);
 }
 
-// ── Admin page — Tools menu ───────────────────────────────────────────────────
+// ── Admin page ────────────────────────────────────────────────────────────────
 
 add_action( 'admin_menu', 'arc_qb_add_instructor_sync_page' );
 
 /**
- * Register the QB Instructor Sync page under WP Admin → Tools.
+ * Register the QB Instructor Sync submenu under the Instructors CPT admin menu.
  */
 function arc_qb_add_instructor_sync_page() {
-	add_management_page(
+	add_submenu_page(
+		'edit.php?post_type=instructor',
 		'QB Instructor Sync',
 		'QB Instructor Sync',
 		'manage_options',

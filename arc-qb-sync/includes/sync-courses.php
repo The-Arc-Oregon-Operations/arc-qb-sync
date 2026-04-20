@@ -377,15 +377,16 @@ function arc_qb_sync_all_courses() {
 	);
 }
 
-// ── Admin page — Tools menu ───────────────────────────────────────────────────
+// ── Admin page ────────────────────────────────────────────────────────────────
 
 add_action( 'admin_menu', 'arc_qb_add_course_sync_page' );
 
 /**
- * Register the QB Course Sync page under WP Admin → Tools.
+ * Register the QB Course Sync submenu under the Courses CPT admin menu.
  */
 function arc_qb_add_course_sync_page() {
-	add_management_page(
+	add_submenu_page(
+		'edit.php?post_type=course',
 		'QB Course Sync',
 		'QB Course Sync',
 		'manage_options',

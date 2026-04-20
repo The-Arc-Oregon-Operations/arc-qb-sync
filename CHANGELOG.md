@@ -1,5 +1,29 @@
 # Changelog
 
+## [3.6.0] — 2026-04-20
+
+### Added
+- `includes/elementor-dynamic-tags.php`: three custom Elementor dynamic tags — **Event Meta**, **Course Meta**, and **Instructor Meta** — registered in the "Post" group of Elementor's dynamic tag picker
+  - Each tag exposes a labeled **Field** dropdown populated with all user-facing display fields for the respective CPT (`arc_event`, `course`, `instructor`)
+  - Render delegates to the existing `[event_*]` / `[course_*]` / `[instructor_*]` shortcodes, keeping escaping and post-type gating centralized
+  - Graceful degradation: file returns early if Elementor (or `\Elementor\Core\DynamicTags\Tag`) is not loaded
+  - Fields excluded from dropdowns by design: internal QB ID / slug fields, boolean flags, and legacy bridge fields
+- `docs/elementor-field-keys.md`: added header note and per-CPT callout explaining that dynamic tags now replace the manual Custom Key workflow
+
+### Changed
+- Admin sync pages moved from **WP Admin → Tools** to submenus under their respective CPT menu entries:
+  - **QB Event Sync** now lives under Events (matching the "QB Event Sync" label preference)
+  - **QB Course Sync** now lives under Courses
+  - **QB Instructor Sync** now lives under Instructors
+  - Matches the pattern used in `summit-qb-sync` (Sync under Sessions / Presenters)
+  - No slug or callback changes — bookmarked admin URLs with `page=arc-qb-*-sync` still resolve correctly
+
+### Why
+- Elementor Pro's built-in "Post Custom Field" tag does not reliably populate its Key dropdown in Theme Builder template context (empty even with a real preview post and populated meta)
+- This ports the same fix shipped in `summit-qb-sync` v1.8.0 to the arc-qb-sync plugin
+
+---
+
 ## [3.5.0] — 2026-04-12
 
 ### Added

@@ -294,15 +294,16 @@ function arc_qb_sync_all_events() {
 	);
 }
 
-// ── Admin page — Tools menu ───────────────────────────────────────────────────
+// ── Admin page ────────────────────────────────────────────────────────────────
 
 add_action( 'admin_menu', 'arc_qb_add_event_sync_page' );
 
 /**
- * Register the QB Event Sync page under WP Admin → Tools.
+ * Register the QB Event Sync submenu under the Events CPT admin menu.
  */
 function arc_qb_add_event_sync_page() {
-	add_management_page(
+	add_submenu_page(
+		'edit.php?post_type=arc_event',
 		'QB Event Sync',
 		'QB Event Sync',
 		'manage_options',
