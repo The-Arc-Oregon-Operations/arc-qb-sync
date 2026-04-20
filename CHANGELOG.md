@@ -10,6 +10,9 @@
   - Fields excluded from dropdowns by design: internal QB ID / slug fields, boolean flags, and legacy bridge fields
 - `docs/elementor-field-keys.md`: added header note and per-CPT callout explaining that dynamic tags now replace the manual Custom Key workflow
 
+### Fixed
+- `elementor-dynamic-tags.php` load deferred to `plugins_loaded` priority 20 in `arc-qb-sync.php`. Loading the file at plugin-include time caused the `class_exists('Elementor\Plugin')` guard to return false and bail out silently — because "arc" sorts before "elementor" alphabetically, so arc-qb-sync is included before Elementor registers its autoloader. Deferring to `plugins_loaded` priority 20 ensures Elementor (priority 10) has fully initialized before the class checks run.
+
 ### Changed
 - Admin sync pages moved from **WP Admin → Tools** to submenus under their respective CPT menu entries:
   - **QB Event Sync** now lives under Events (matching the "QB Event Sync" label preference)
