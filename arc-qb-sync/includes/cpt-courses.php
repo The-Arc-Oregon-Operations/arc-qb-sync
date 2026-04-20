@@ -50,7 +50,7 @@ function arc_qb_register_course_cpt() {
 			'show_in_rest'        => true,
 			'supports'            => array( 'title', 'editor', 'thumbnail', 'excerpt', 'custom-fields' ),
 			'has_archive'         => false,
-			'rewrite'             => array( 'slug' => 'course' ),
+			'rewrite'             => array( 'slug' => 'courses' ),
 			'menu_icon'           => 'dashicons-welcome-learn-more',
 		)
 	);
@@ -80,7 +80,28 @@ function arc_qb_register_course_tag_taxonomy() {
 	);
 }
 
-// ── 3. Legacy ?course-id= redirect ───────────────────────────────────────────
+// ── 3. Backward-compat redirect: /course/[slug]/ → /courses/[slug]/ ──────────
+
+add_action( 'template_redirect', 'arc_qb_redirect_old_course_cpt_urls' );
+
+/**
+ * Redirect old /course/[slug]/ URLs to /courses/[slug]/ after the CPT rewrite
+ * slug was changed from 'course' to 'courses' in v3.6.0.
+ *
+ * The slug was changed because the CPT rewrite slug 'course' conflicted with
+ * any WordPress page whose slug starts with 'course' (e.g. course-catalog),
+ * preventing those pages from being nested under a parent page correctly.
+ */
+function arc_qb_redirect_old_course_cpt_urls() {
+	$uri = isset( $_SERVER['REQUEST_URI'] ) ? $_SERVER['REQUEST_URI'] : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+	if ( ! preg_match( '#^/course/([^/?]+)/?$#', $uri, $matches ) ) {
+		return;
+	}
+	wp_redirect( home_url( '/courses/' . $matches[1] . '/' ), 301 );
+	exit;
+}
+
+// ── 4. Legacy ?course-id= redirect ───────────────────────────────────────────
 
 add_action( 'template_redirect', 'arc_qb_redirect_legacy_course_url' );
 

@@ -10,9 +10,6 @@
   - Fields excluded from dropdowns by design: internal QB ID / slug fields, boolean flags, and legacy bridge fields
 - `docs/elementor-field-keys.md`: added header note and per-CPT callout explaining that dynamic tags now replace the manual Custom Key workflow
 
-### Fixed
-- `elementor-dynamic-tags.php` load deferred to `plugins_loaded` priority 20 in `arc-qb-sync.php`. Loading the file at plugin-include time caused the `class_exists('Elementor\Plugin')` guard to return false and bail out silently — because "arc" sorts before "elementor" alphabetically, so arc-qb-sync is included before Elementor registers its autoloader. Deferring to `plugins_loaded` priority 20 ensures Elementor (priority 10) has fully initialized before the class checks run.
-
 ### Changed
 - Admin sync pages moved from **WP Admin → Tools** to submenus under their respective CPT menu entries:
   - **QB Event Sync** now lives under Events (matching the "QB Event Sync" label preference)
@@ -24,6 +21,14 @@
 ### Why
 - Elementor Pro's built-in "Post Custom Field" tag does not reliably populate its Key dropdown in Theme Builder template context (empty even with a real preview post and populated meta)
 - This ports the same fix shipped in `summit-qb-sync` v1.8.0 to the arc-qb-sync plugin
+
+---
+
+## [3.6.1] — 2026-04-20
+
+### Fixed
+- `course` CPT rewrite slug changed from `course` to `courses` in `cpt-courses.php`. The slug `course` conflicted with any WordPress page whose slug started with `course` (e.g. `course-catalog`), causing those pages to redirect to their old top-level URL even after a parent page was correctly set. Individual course posts move from `/course/[slug]/` to `/courses/[slug]/`; a 301 backward-compat redirect in `cpt-courses.php` covers any existing links. **Flush permalinks after deploying.**
+- `elementor-dynamic-tags.php` load deferred to `plugins_loaded` priority 20 in `arc-qb-sync.php`. Loading the file at plugin-include time caused the `class_exists('Elementor\Plugin')` guard to return false and bail out silently — "arc" sorts before "elementor" alphabetically, so arc-qb-sync is included before Elementor registers its autoloader. Deferring to `plugins_loaded` priority 20 ensures Elementor (priority 10) has fully initialized before the class checks run.
 
 ---
 
