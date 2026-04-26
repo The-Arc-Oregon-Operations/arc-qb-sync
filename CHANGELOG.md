@@ -1,5 +1,23 @@
 # Changelog
 
+## [3.7.0] — 2026-04-25
+
+### Added
+- `qb-api.php`: `arc_qb_upsert_record()` — general-purpose QB write function (POST to /v1/records); first write capability in arc-qb-sync
+- `qb-api.php`: `arc_qb_download_image_file()` — downloads a file from a QB File Attachment field via the QB Files API
+- `qb-api.php`: `arc_qb_write_image_attachment_id()` — writes WP attachment ID (and optionally public URL + Processing Status = Processed) back to the Image Assets record in QB after first-touch sideload
+- `sync-courses.php`, `sync-events.php`, `sync-instructors.php`: new pipeline FID constants for Image Assets Attachment ID, Review Status, and relationship FK fields on each child table
+
+### Changed
+- `qb-api.php`: `arc_qb_sync_set_featured_image()` upgraded from URL-only to Option A pipeline. New signature: `arc_qb_sync_set_featured_image( $post_id, array $args )`. Fast path reads stored `i_attachment_id`; miss path gates on `i_review_status = Approved`, then downloads QB file attachment or falls back to URL sideload; writes attachment ID back to QB on success.
+- Courses, Events, Instructors: featured image sync now uses Option A; hero/headshot slots also run Option A writeback (not set_post_thumbnail for hero)
+
+### Notes
+- All new FID constants default to 0 when not yet populated; the plugin skips gracefully when FIDs are 0. Safe to deploy before the FID Log is finalized, but Option A will not activate until constants are filled.
+- Requires `QB_IMAGE_ASSETS_TABLE_ID` defined in wp-config.php as `'bvx88yiv2'`
+
+---
+
 ## [3.6.2] — 2026-04-20
 
 ### Changed

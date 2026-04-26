@@ -48,6 +48,23 @@ define( 'ARC_QB_COURSE_HERO_IMAGE_FID',       96  ); // Courses: Hero Image URL 
 define( 'ARC_QB_COURSE_OFFERS_ONLINE_FID',   109 ); // Offer delivery Online — Checkbox → "1" / "0"
 define( 'ARC_QB_COURSE_OFFERS_INPERSON_FID', 110 ); // Offer delivery In-Person — Checkbox → "1" / "0"
 
+// ── Image Assets pipeline FID constants (Image Assets table bvx88yiv2) ────────
+// Shared across Courses, Events, Instructors. Defined here once; guarded with
+// defined() so later sync files don't redefine.
+// FIDs confirmed from snapshot-2026-04-26-2048.md.
+if ( ! defined( 'ARC_QB_IA_FID_ATTACHMENT_ID' ) ) define( 'ARC_QB_IA_FID_ATTACHMENT_ID', 24 ); // i_attachment_id
+if ( ! defined( 'ARC_QB_IA_FID_URL' ) )           define( 'ARC_QB_IA_FID_URL',            6 ); // i_url — existing FID 6
+if ( ! defined( 'ARC_QB_IA_FID_PROC_STATUS' ) )   define( 'ARC_QB_IA_FID_PROC_STATUS',   28 ); // i_processing_status
+if ( ! defined( 'ARC_QB_IA_FID_FILE' ) )          define( 'ARC_QB_IA_FID_FILE',          30 ); // i_file (File Attachment)
+
+// ── Courses: pipeline lookup FIDs ─────────────────────────────────────────────
+if ( ! defined( 'ARC_QB_COURSE_FEATURED_IMAGE_FK_FID' ) )         define( 'ARC_QB_COURSE_FEATURED_IMAGE_FK_FID',          93 ); // Featured Image [Ref] — FK holding IA Record ID#
+if ( ! defined( 'ARC_QB_COURSE_FEATURED_IMAGE_ATTACHMENT_FID' ) ) define( 'ARC_QB_COURSE_FEATURED_IMAGE_ATTACHMENT_FID', 111 ); // Featured Image - Attachment ID [lookup]
+if ( ! defined( 'ARC_QB_COURSE_FEATURED_IMAGE_REVIEW_FID' ) )     define( 'ARC_QB_COURSE_FEATURED_IMAGE_REVIEW_FID',     112 ); // Featured Image - Review Status [lookup]
+if ( ! defined( 'ARC_QB_COURSE_HERO_IMAGE_FK_FID' ) )             define( 'ARC_QB_COURSE_HERO_IMAGE_FK_FID',              95 ); // Hero Image [Ref] — FK holding IA Record ID#
+if ( ! defined( 'ARC_QB_COURSE_HERO_IMAGE_ATTACHMENT_FID' ) )     define( 'ARC_QB_COURSE_HERO_IMAGE_ATTACHMENT_FID',     113 ); // Hero Image - Attachment ID [lookup]
+if ( ! defined( 'ARC_QB_COURSE_HERO_IMAGE_REVIEW_FID' ) )         define( 'ARC_QB_COURSE_HERO_IMAGE_REVIEW_FID',         114 ); // Hero Image - Review Status [lookup]
+
 // ── QB fetch helpers ──────────────────────────────────────────────────────────
 
 /**
@@ -70,6 +87,14 @@ function arc_qb_fetch_course_record( $record_id ) {
 		ARC_QB_COURSE_OFFERS_ONLINE_FID,   // 109
 		ARC_QB_COURSE_OFFERS_INPERSON_FID, // 110
 	);
+
+	// Add pipeline FIDs (non-zero only — safe to deploy before FID log is finalized).
+	if ( ARC_QB_COURSE_FEATURED_IMAGE_FK_FID > 0 )         $select[] = ARC_QB_COURSE_FEATURED_IMAGE_FK_FID;
+	if ( ARC_QB_COURSE_FEATURED_IMAGE_ATTACHMENT_FID > 0 ) $select[] = ARC_QB_COURSE_FEATURED_IMAGE_ATTACHMENT_FID;
+	if ( ARC_QB_COURSE_FEATURED_IMAGE_REVIEW_FID > 0 )     $select[] = ARC_QB_COURSE_FEATURED_IMAGE_REVIEW_FID;
+	if ( ARC_QB_COURSE_HERO_IMAGE_FK_FID > 0 )             $select[] = ARC_QB_COURSE_HERO_IMAGE_FK_FID;
+	if ( ARC_QB_COURSE_HERO_IMAGE_ATTACHMENT_FID > 0 )     $select[] = ARC_QB_COURSE_HERO_IMAGE_ATTACHMENT_FID;
+	if ( ARC_QB_COURSE_HERO_IMAGE_REVIEW_FID > 0 )         $select[] = ARC_QB_COURSE_HERO_IMAGE_REVIEW_FID;
 
 	$body = array(
 		'from'   => QB_COURSES_TABLE_ID,
@@ -119,6 +144,14 @@ function arc_qb_fetch_all_course_records() {
 		ARC_QB_COURSE_OFFERS_ONLINE_FID,   // 109
 		ARC_QB_COURSE_OFFERS_INPERSON_FID, // 110
 	);
+
+	// Add pipeline FIDs (non-zero only — safe to deploy before FID log is finalized).
+	if ( ARC_QB_COURSE_FEATURED_IMAGE_FK_FID > 0 )         $select[] = ARC_QB_COURSE_FEATURED_IMAGE_FK_FID;
+	if ( ARC_QB_COURSE_FEATURED_IMAGE_ATTACHMENT_FID > 0 ) $select[] = ARC_QB_COURSE_FEATURED_IMAGE_ATTACHMENT_FID;
+	if ( ARC_QB_COURSE_FEATURED_IMAGE_REVIEW_FID > 0 )     $select[] = ARC_QB_COURSE_FEATURED_IMAGE_REVIEW_FID;
+	if ( ARC_QB_COURSE_HERO_IMAGE_FK_FID > 0 )             $select[] = ARC_QB_COURSE_HERO_IMAGE_FK_FID;
+	if ( ARC_QB_COURSE_HERO_IMAGE_ATTACHMENT_FID > 0 )     $select[] = ARC_QB_COURSE_HERO_IMAGE_ATTACHMENT_FID;
+	if ( ARC_QB_COURSE_HERO_IMAGE_REVIEW_FID > 0 )         $select[] = ARC_QB_COURSE_HERO_IMAGE_REVIEW_FID;
 
 	$body = array(
 		'from'   => QB_COURSES_TABLE_ID,
@@ -289,8 +322,68 @@ function arc_qb_upsert_course( array $record ) {
 	$tag_slugs = implode( ',', array_map( 'sanitize_title', $tag_names ) );
 	update_post_meta( $post_id, '_course_tag_slugs', $tag_slugs );
 
-	// ── Featured image ────────────────────────────────────────────────────────
-	arc_qb_sync_set_featured_image( $post_id, $course_featured_image_url );
+	// ── Featured image — Option A ─────────────────────────────────────────────
+	arc_qb_sync_set_featured_image( $post_id, array(
+		'attachment_id' => intval( arc_qb_get_course_field( $record, ARC_QB_COURSE_FEATURED_IMAGE_ATTACHMENT_FID ) ),
+		'review_status' => sanitize_text_field( arc_qb_get_course_field( $record, ARC_QB_COURSE_FEATURED_IMAGE_REVIEW_FID ) ),
+		'image_url'     => $course_featured_image_url, // existing FID 94 URL lookup (fallback)
+		'ia_record_id'  => intval( arc_qb_get_course_field( $record, ARC_QB_COURSE_FEATURED_IMAGE_FK_FID ) ),
+		'ia_filename'   => sanitize_file_name( get_post_meta( $post_id, '_arc_course_slug', true ) . '-featured' ),
+		'context_label' => 'Course ' . intval( arc_qb_get_course_field( $record, 3 ) ) . ' featured',
+	) );
+
+	// ── Hero image — Option A writeback only (not set_post_thumbnail) ─────────
+	// Hero URL is stored as post meta and displayed via shortcode. We still run Option A
+	// so that QB file uploads are sideloaded and the attachment ID is written back.
+	$hero_attachment_id = intval( arc_qb_get_course_field( $record, ARC_QB_COURSE_HERO_IMAGE_ATTACHMENT_FID ) );
+	$hero_review_status = sanitize_text_field( arc_qb_get_course_field( $record, ARC_QB_COURSE_HERO_IMAGE_REVIEW_FID ) );
+	$hero_ia_record_id  = intval( arc_qb_get_course_field( $record, ARC_QB_COURSE_HERO_IMAGE_FK_FID ) );
+	$hero_image_url     = esc_url_raw( arc_qb_get_course_field( $record, ARC_QB_COURSE_HERO_IMAGE_FID ) );
+
+	if ( 0 === $hero_attachment_id && 'Approved' === $hero_review_status && $hero_ia_record_id > 0 ) {
+		if ( ! function_exists( 'media_sideload_image' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/media.php';
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+			require_once ABSPATH . 'wp-admin/includes/image.php';
+		}
+		$hero_att_id  = 0;
+		$hero_pub_url = '';
+
+		// Try QB file first.
+		if ( defined( 'ARC_QB_IA_FID_FILE' ) && ARC_QB_IA_FID_FILE > 0 ) {
+			$hero_slug = sanitize_file_name( get_post_meta( $post_id, '_arc_course_slug', true ) . '-hero' );
+			$file = arc_qb_download_image_file( QB_IMAGE_ASSETS_TABLE_ID, $hero_ia_record_id, ARC_QB_IA_FID_FILE, $hero_slug );
+			if ( ! is_wp_error( $file ) ) {
+				$moved = wp_handle_sideload( $file, array( 'test_form' => false ) );
+				if ( empty( $moved['error'] ) ) {
+					$att = wp_insert_attachment( array(
+						'post_mime_type' => $moved['type'],
+						'post_title'     => sanitize_file_name( pathinfo( $moved['file'], PATHINFO_FILENAME ) ),
+						'post_content'   => '',
+						'post_status'    => 'inherit',
+					), $moved['file'], $post_id );
+					if ( ! is_wp_error( $att ) ) {
+						wp_update_attachment_metadata( $att, wp_generate_attachment_metadata( $att, $moved['file'] ) );
+						$hero_att_id  = $att;
+						$hero_pub_url = wp_get_attachment_url( $att );
+					}
+				}
+				if ( file_exists( $file['tmp_name'] ) ) { @unlink( $file['tmp_name'] ); } // phpcs:ignore
+			}
+		}
+		// URL fallback.
+		if ( 0 === $hero_att_id && $hero_image_url ) {
+			$result = media_sideload_image( $hero_image_url, $post_id, null, 'id' );
+			if ( ! is_wp_error( $result ) ) {
+				$hero_att_id  = $result;
+				$hero_pub_url = wp_get_attachment_url( $hero_att_id );
+			}
+		}
+		// Writeback.
+		if ( $hero_att_id > 0 ) {
+			arc_qb_write_image_attachment_id( $hero_ia_record_id, $hero_att_id, $hero_pub_url );
+		}
+	}
 
 	return $post_id;
 }
