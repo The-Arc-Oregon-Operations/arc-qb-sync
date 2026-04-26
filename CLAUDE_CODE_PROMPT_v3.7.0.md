@@ -1,9 +1,11 @@
 ---
-status: ready-for-code
+status: shipped
 started: 2026-04-25
 owner: Alan Lytle
 target_version: 3.7.0
 notes: FID Log confirmed from snapshot-2026-04-26-2048.md. QB_IMAGE_ASSETS_TABLE_ID defined in wp-config.php. All FID constants below are real values — no placeholders remain.
+shipped: 2026-04-25
+shipped_version: 3.7.0
 ---
 
 # arc-qb-sync v3.7.0 — Option A Image Pipeline

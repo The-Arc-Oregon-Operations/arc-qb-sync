@@ -52,6 +52,11 @@ if ( ! defined( 'ARC_QB_INSTRUCTOR_FID_PRONOUNS' ) )     define( 'ARC_QB_INSTRUC
 if ( ! defined( 'ARC_QB_INSTRUCTOR_FID_TRAINER_ROLES' ) ) define( 'ARC_QB_INSTRUCTOR_FID_TRAINER_ROLES', 31 ); // Trainer Role(s) — pre-formatted HTML (p, ul, li)
 if ( ! defined( 'ARC_QB_INSTRUCTOR_PROFILE_FID' ) )      define( 'ARC_QB_INSTRUCTOR_PROFILE_FID',      15 ); // Headshot URL [lookup from Image Assets]
 
+// ── Instructors: Image Asset pipeline FIDs ────────────────────────────────────
+if ( ! defined( 'ARC_QB_INSTRUCTOR_HEADSHOT_FK_FID' ) )         define( 'ARC_QB_INSTRUCTOR_HEADSHOT_FK_FID',         14 ); // Headshot [Ref] — FK
+if ( ! defined( 'ARC_QB_INSTRUCTOR_HEADSHOT_ATTACHMENT_FID' ) ) define( 'ARC_QB_INSTRUCTOR_HEADSHOT_ATTACHMENT_FID', 32 ); // Headshot - Attachment ID [lookup]
+if ( ! defined( 'ARC_QB_INSTRUCTOR_HEADSHOT_REVIEW_FID' ) )     define( 'ARC_QB_INSTRUCTOR_HEADSHOT_REVIEW_FID',     33 ); // Headshot - Review Status [lookup]
+
 // ── QB fetch helpers ──────────────────────────────────────────────────────────
 
 /**
@@ -84,6 +89,11 @@ function arc_qb_fetch_all_instructor_records() {
 		ARC_QB_INSTRUCTOR_FID_PRONOUNS,     // 29
 		ARC_QB_INSTRUCTOR_FID_TRAINER_ROLES, // 31
 	);
+
+	// Add pipeline FIDs (non-zero only — safe to deploy before FID log is finalized).
+	if ( ARC_QB_INSTRUCTOR_HEADSHOT_FK_FID > 0 )         $select[] = ARC_QB_INSTRUCTOR_HEADSHOT_FK_FID;
+	if ( ARC_QB_INSTRUCTOR_HEADSHOT_ATTACHMENT_FID > 0 ) $select[] = ARC_QB_INSTRUCTOR_HEADSHOT_ATTACHMENT_FID;
+	if ( ARC_QB_INSTRUCTOR_HEADSHOT_REVIEW_FID > 0 )     $select[] = ARC_QB_INSTRUCTOR_HEADSHOT_REVIEW_FID;
 
 	$body = array(
 		'from'   => QB_INSTRUCTORS_TABLE_ID,
@@ -217,8 +227,16 @@ function arc_qb_upsert_instructor( array $record ) {
 		wp_kses_post( arc_qb_get_course_field( $record, ARC_QB_INSTRUCTOR_FID_TRAINER_ROLES ) ) );
 	// Note: no wpautop() — content arrives from QB pre-formatted with <p>/<ul> markup.
 
-	// ── Featured image ────────────────────────────────────────────────────────
-	arc_qb_sync_set_featured_image( $post_id, $headshot_url );
+	// ── Headshot — Option A ───────────────────────────────────────────────────
+	$instructor_slug = sanitize_file_name( get_post_meta( $post_id, '_arc_instructor_slug', true ) );
+	arc_qb_sync_set_featured_image( $post_id, array(
+		'attachment_id' => intval( arc_qb_get_course_field( $record, ARC_QB_INSTRUCTOR_HEADSHOT_ATTACHMENT_FID ) ),
+		'review_status' => sanitize_text_field( arc_qb_get_course_field( $record, ARC_QB_INSTRUCTOR_HEADSHOT_REVIEW_FID ) ),
+		'image_url'     => $headshot_url, // existing FID 15 URL lookup (fallback)
+		'ia_record_id'  => intval( arc_qb_get_course_field( $record, ARC_QB_INSTRUCTOR_HEADSHOT_FK_FID ) ),
+		'ia_filename'   => $instructor_slug . '-headshot',
+		'context_label' => 'Instructor ' . intval( arc_qb_get_course_field( $record, ARC_QB_INSTRUCTOR_FID_RECORD_ID ) ) . ' headshot',
+	) );
 
 	return $post_id;
 }

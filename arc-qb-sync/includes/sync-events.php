@@ -45,6 +45,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 define( 'ARC_QB_EVENT_FEATURED_IMAGE_FID', 464 ); // Events: Featured Image URL [lookup from Image Assets]
 define( 'ARC_QB_EVENT_HERO_IMAGE_FID',     466 ); // Events: Hero Image URL [lookup from Image Assets]
 
+// ── Events: pipeline lookup FIDs ──────────────────────────────────────────────
+// Shared ARC_QB_IA_FID_* constants are defined in sync-courses.php (loaded first).
+if ( ! defined( 'ARC_QB_EVENT_FEATURED_IMAGE_FK_FID' ) )         define( 'ARC_QB_EVENT_FEATURED_IMAGE_FK_FID',         463 ); // Featured Image [Ref] — FK
+if ( ! defined( 'ARC_QB_EVENT_FEATURED_IMAGE_ATTACHMENT_FID' ) ) define( 'ARC_QB_EVENT_FEATURED_IMAGE_ATTACHMENT_FID', 495 ); // Featured Image - Attachment ID [lookup]
+if ( ! defined( 'ARC_QB_EVENT_FEATURED_IMAGE_REVIEW_FID' ) )     define( 'ARC_QB_EVENT_FEATURED_IMAGE_REVIEW_FID',     496 ); // Featured Image - Review Status [lookup]
+if ( ! defined( 'ARC_QB_EVENT_HERO_IMAGE_FK_FID' ) )             define( 'ARC_QB_EVENT_HERO_IMAGE_FK_FID',             465 ); // Hero Image [Ref] — FK
+if ( ! defined( 'ARC_QB_EVENT_HERO_IMAGE_ATTACHMENT_FID' ) )     define( 'ARC_QB_EVENT_HERO_IMAGE_ATTACHMENT_FID',     497 ); // Hero Image - Attachment ID [lookup]
+if ( ! defined( 'ARC_QB_EVENT_HERO_IMAGE_REVIEW_FID' ) )         define( 'ARC_QB_EVENT_HERO_IMAGE_REVIEW_FID',         498 ); // Hero Image - Review Status [lookup]
+
 // ── QB fetch helpers ──────────────────────────────────────────────────────────
 
 /**
@@ -69,6 +78,14 @@ function arc_qb_fetch_all_event_records() {
 
 	// Image lookup FIDs — hardcoded (stable QB schema, not wp-config).
 	$select = array_merge( $select, array( 464, 466 ) );
+
+	// Add pipeline FIDs (non-zero only — safe to deploy before FID log is finalized).
+	if ( ARC_QB_EVENT_FEATURED_IMAGE_FK_FID > 0 )         $select[] = ARC_QB_EVENT_FEATURED_IMAGE_FK_FID;
+	if ( ARC_QB_EVENT_FEATURED_IMAGE_ATTACHMENT_FID > 0 ) $select[] = ARC_QB_EVENT_FEATURED_IMAGE_ATTACHMENT_FID;
+	if ( ARC_QB_EVENT_FEATURED_IMAGE_REVIEW_FID > 0 )     $select[] = ARC_QB_EVENT_FEATURED_IMAGE_REVIEW_FID;
+	if ( ARC_QB_EVENT_HERO_IMAGE_FK_FID > 0 )             $select[] = ARC_QB_EVENT_HERO_IMAGE_FK_FID;
+	if ( ARC_QB_EVENT_HERO_IMAGE_ATTACHMENT_FID > 0 )     $select[] = ARC_QB_EVENT_HERO_IMAGE_ATTACHMENT_FID;
+	if ( ARC_QB_EVENT_HERO_IMAGE_REVIEW_FID > 0 )         $select[] = ARC_QB_EVENT_HERO_IMAGE_REVIEW_FID;
 
 	$body = array(
 		'from'   => QB_TABLE_ID,
@@ -214,8 +231,69 @@ function arc_qb_upsert_event( array $record ) {
 	update_post_meta( $post_id, '_arc_event_hero_image_url',
 		esc_url_raw( arc_qb_get_course_field( $record, 466 ) ) );
 
-	// ── Featured image ────────────────────────────────────────────────────────
-	arc_qb_sync_set_featured_image( $post_id, $event_featured_image_url );
+	// Store event slug for use as filename hint in image sideloads.
+	update_post_meta( $post_id, '_arc_event_slug', get_post_field( 'post_name', $post_id ) );
+
+	// ── Featured image — Option A ─────────────────────────────────────────────
+	arc_qb_sync_set_featured_image( $post_id, array(
+		'attachment_id' => intval( arc_qb_get_course_field( $record, ARC_QB_EVENT_FEATURED_IMAGE_ATTACHMENT_FID ) ),
+		'review_status' => sanitize_text_field( arc_qb_get_course_field( $record, ARC_QB_EVENT_FEATURED_IMAGE_REVIEW_FID ) ),
+		'image_url'     => $event_featured_image_url, // existing FID 464 URL lookup (fallback)
+		'ia_record_id'  => intval( arc_qb_get_course_field( $record, ARC_QB_EVENT_FEATURED_IMAGE_FK_FID ) ),
+		'ia_filename'   => sanitize_file_name( get_post_meta( $post_id, '_arc_event_slug', true ) . '-featured' ),
+		'context_label' => 'Event ' . $qb_event_id . ' featured',
+	) );
+
+	// ── Hero image — Option A writeback only (not set_post_thumbnail) ─────────
+	$hero_attachment_id = intval( arc_qb_get_course_field( $record, ARC_QB_EVENT_HERO_IMAGE_ATTACHMENT_FID ) );
+	$hero_review_status = sanitize_text_field( arc_qb_get_course_field( $record, ARC_QB_EVENT_HERO_IMAGE_REVIEW_FID ) );
+	$hero_ia_record_id  = intval( arc_qb_get_course_field( $record, ARC_QB_EVENT_HERO_IMAGE_FK_FID ) );
+	$hero_image_url     = esc_url_raw( arc_qb_get_course_field( $record, ARC_QB_EVENT_HERO_IMAGE_FID ) );
+
+	if ( 0 === $hero_attachment_id && 'Approved' === $hero_review_status && $hero_ia_record_id > 0 ) {
+		if ( ! function_exists( 'media_sideload_image' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/media.php';
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+			require_once ABSPATH . 'wp-admin/includes/image.php';
+		}
+		$hero_att_id  = 0;
+		$hero_pub_url = '';
+
+		// Try QB file first.
+		if ( defined( 'ARC_QB_IA_FID_FILE' ) && ARC_QB_IA_FID_FILE > 0 ) {
+			$hero_slug = sanitize_file_name( get_post_meta( $post_id, '_arc_event_slug', true ) . '-hero' );
+			$file = arc_qb_download_image_file( QB_IMAGE_ASSETS_TABLE_ID, $hero_ia_record_id, ARC_QB_IA_FID_FILE, $hero_slug );
+			if ( ! is_wp_error( $file ) ) {
+				$moved = wp_handle_sideload( $file, array( 'test_form' => false ) );
+				if ( empty( $moved['error'] ) ) {
+					$att = wp_insert_attachment( array(
+						'post_mime_type' => $moved['type'],
+						'post_title'     => sanitize_file_name( pathinfo( $moved['file'], PATHINFO_FILENAME ) ),
+						'post_content'   => '',
+						'post_status'    => 'inherit',
+					), $moved['file'], $post_id );
+					if ( ! is_wp_error( $att ) ) {
+						wp_update_attachment_metadata( $att, wp_generate_attachment_metadata( $att, $moved['file'] ) );
+						$hero_att_id  = $att;
+						$hero_pub_url = wp_get_attachment_url( $att );
+					}
+				}
+				if ( file_exists( $file['tmp_name'] ) ) { @unlink( $file['tmp_name'] ); } // phpcs:ignore
+			}
+		}
+		// URL fallback.
+		if ( 0 === $hero_att_id && $hero_image_url ) {
+			$result = media_sideload_image( $hero_image_url, $post_id, null, 'id' );
+			if ( ! is_wp_error( $result ) ) {
+				$hero_att_id  = $result;
+				$hero_pub_url = wp_get_attachment_url( $hero_att_id );
+			}
+		}
+		// Writeback.
+		if ( $hero_att_id > 0 ) {
+			arc_qb_write_image_attachment_id( $hero_ia_record_id, $hero_att_id, $hero_pub_url );
+		}
+	}
 
 	return $post_id;
 }
