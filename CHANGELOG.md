@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.7.1] — 2026-04-25
+
+### Fixed
+- `qb-api.php`: `arc_qb_download_image_file()` — QB Files API returns file content base64-encoded; decode before writing to disk so WordPress receives valid binary (previously stored base64 text, causing blank media previews)
+- `qb-api.php`: `arc_qb_download_image_file()` — resolve final filename from `Content-Disposition` response header (preserves original QB filename and extension) before falling back to extension derived from content-type; fixes extensionless attachment filenames (e.g. `featured` with no `.png`)
+
+---
+
 ## [3.7.0] — 2026-04-25
 
 ### Added

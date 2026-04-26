@@ -339,9 +339,48 @@ function arc_qb_download_image_file( $table_id, $record_id, $field_id, $filename
 		return new WP_Error( 'arc_qb_file_empty', 'QB file download returned empty body.' );
 	}
 
+	// QB Files API returns the file content base64-encoded in the response body.
+	// Decode before writing to disk so WP receives real binary, not base64 text.
+	$decoded = base64_decode( $body, true ); // strict=true: returns false on invalid base64
+	if ( false !== $decoded && '' !== $decoded ) {
+		$body = $decoded;
+	}
+
 	// Detect content type from response headers.
 	$content_type = wp_remote_retrieve_header( $response, 'content-type' );
 	$content_type = $content_type ?: 'application/octet-stream';
+
+	// ── Resolve final filename with extension ─────────────────────────────────
+	// Priority 1: original filename from Content-Disposition (QB sends this).
+	// Priority 2: extension derived from content-type.
+	// Priority 3: passed $filename as-is (no extension — least preferred).
+	$final_name = '';
+
+	$content_disposition = wp_remote_retrieve_header( $response, 'content-disposition' );
+	if ( $content_disposition ) {
+		// Matches both filename="foo.png" and filename*=UTF-8''foo.png forms.
+		if ( preg_match( '/filename\*?=["\']?(?:UTF-\d+\'\')?([^\'";\s]+)["\']?/i', $content_disposition, $m ) ) {
+			$final_name = sanitize_file_name( rawurldecode( $m[1] ) );
+		}
+	}
+
+	if ( ! $final_name ) {
+		$base = pathinfo( sanitize_file_name( $filename ), PATHINFO_FILENAME );
+		$base = $base ?: 'image';
+
+		$mime_ext = array(
+			'image/jpeg'   => 'jpg',
+			'image/jpg'    => 'jpg',
+			'image/png'    => 'png',
+			'image/gif'    => 'gif',
+			'image/webp'   => 'webp',
+			'image/svg+xml' => 'svg',
+		);
+		$base_mime = strtolower( trim( explode( ';', $content_type )[0] ) );
+		$ext       = $mime_ext[ $base_mime ] ?? '';
+
+		$final_name = $ext ? "{$base}.{$ext}" : sanitize_file_name( $filename );
+	}
 
 	// Write to a temp file in WP's upload tmp dir.
 	$tmp_dir  = get_temp_dir();
@@ -354,7 +393,7 @@ function arc_qb_download_image_file( $table_id, $record_id, $field_id, $filename
 
 	return array(
 		'tmp_name' => $tmp_file,
-		'name'     => sanitize_file_name( $filename ),
+		'name'     => $final_name,
 		'size'     => strlen( $body ),
 		'type'     => $content_type,
 	);
