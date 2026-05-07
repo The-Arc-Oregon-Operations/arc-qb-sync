@@ -53,15 +53,25 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 function arc_qb_get_event_post_id() {
 	static $resolved_id = null;
+	static $last_the_id = null;
+
+	// Reset the cache whenever get_the_ID() returns a different value.
+	// This handles Elementor Loop Grid: all items render in the same PHP
+	// request, so a plain static would lock onto the first item's post ID
+	// and return it for every subsequent card.
+	$current_the_id = get_the_ID();
+	if ( $current_the_id !== $last_the_id ) {
+		$resolved_id  = null;
+		$last_the_id  = $current_the_id;
+	}
 
 	if ( null !== $resolved_id ) {
 		return $resolved_id;
 	}
 
 	// 1. Current post is an arc_event CPT.
-	$current_id = get_the_ID();
-	if ( $current_id && 'arc_event' === get_post_type( $current_id ) ) {
-		$resolved_id = $current_id;
+	if ( $current_the_id && 'arc_event' === get_post_type( $current_the_id ) ) {
+		$resolved_id = $current_the_id;
 		return $resolved_id;
 	}
 

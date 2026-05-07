@@ -2,7 +2,7 @@
 /**
  * Plugin Name:  Arc Oregon QB Sync
  * Description:  Integrates Quickbase with WordPress for The Arc Oregon. Syncs Course Catalog records as Custom Post Types and provides shortcodes for event detail pages.
- * Version:      3.8.0
+ * Version:      3.8.1
  * Author:       Alan Lytle at The Arc Oregon
  */
 
@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'ARC_QB_SYNC_VERSION', '3.8.0' );
+define( 'ARC_QB_SYNC_VERSION', '3.8.1' );
 define( 'ARC_QB_SYNC_DIR', plugin_dir_path( __FILE__ ) );
 define( 'ARC_QB_SYNC_URL', plugin_dir_url( __FILE__ ) );
 
