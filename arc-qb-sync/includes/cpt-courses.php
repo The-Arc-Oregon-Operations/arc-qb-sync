@@ -77,7 +77,7 @@ add_action( 'pre_get_posts', 'arc_qb_default_course_order' );
  *   menu_order = -5  → second tier if needed
  */
 function arc_qb_default_course_order( WP_Query $query ) {
-	if ( is_admin() || $query->get( 'orderby' ) ) {
+	if ( is_admin() ) {
 		return;
 	}
 	if ( 'course' !== $query->get( 'post_type' ) ) {

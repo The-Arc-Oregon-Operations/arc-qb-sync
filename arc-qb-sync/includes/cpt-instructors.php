@@ -25,7 +25,7 @@ add_action( 'pre_get_posts', 'arc_qb_default_instructor_order' );
  * Only fires when orderby has not already been set on the query.
  */
 function arc_qb_default_instructor_order( WP_Query $query ) {
-	if ( is_admin() || $query->get( 'orderby' ) ) {
+	if ( is_admin() ) {
 		return;
 	}
 	if ( 'instructor' !== $query->get( 'post_type' ) ) {
