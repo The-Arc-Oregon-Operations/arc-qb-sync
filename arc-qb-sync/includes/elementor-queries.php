@@ -14,6 +14,50 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
+ * Query ID: arc_courses_by_menu_order
+ *
+ * Sorts a Loop Grid query of `course` CPT posts by menu_order (ascending).
+ * Set individual posts' order via WP Admin → Courses → edit post → "Order" field
+ * in the Page Attributes box (visible because course supports page-attributes).
+ *
+ * Usage: Set Loop Grid → Query → Source to "Custom" and Query ID to "arc_courses_by_menu_order".
+ */
+add_action( 'elementor/query/arc_courses_by_menu_order', 'arc_qb_elementor_query_courses_by_menu_order' );
+
+function arc_qb_elementor_query_courses_by_menu_order( $query ) {
+	$query->set( 'orderby', 'menu_order' );
+	$query->set( 'order',   'ASC' );
+}
+
+/**
+ * Query ID: arc_instructors_by_menu_order
+ *
+ * Sorts a Loop Grid query of `instructor` CPT posts by menu_order (ascending).
+ *
+ * Usage: Set Loop Grid → Query → Source to "Custom" and Query ID to "arc_instructors_by_menu_order".
+ */
+add_action( 'elementor/query/arc_instructors_by_menu_order', 'arc_qb_elementor_query_instructors_by_menu_order' );
+
+function arc_qb_elementor_query_instructors_by_menu_order( $query ) {
+	$query->set( 'orderby', 'menu_order' );
+	$query->set( 'order',   'ASC' );
+}
+
+/**
+ * Query ID: arc_events_by_menu_order
+ *
+ * Sorts a Loop Grid query of `arc_event` CPT posts by menu_order (ascending).
+ *
+ * Usage: Set Loop Grid → Query → Source to "Custom" and Query ID to "arc_events_by_menu_order".
+ */
+add_action( 'elementor/query/arc_events_by_menu_order', 'arc_qb_elementor_query_events_by_menu_order' );
+
+function arc_qb_elementor_query_events_by_menu_order( $query ) {
+	$query->set( 'orderby', 'menu_order' );
+	$query->set( 'order',   'ASC' );
+}
+
+/**
  * Query ID: arc_event_instructors
  *
  * Filters a Loop Grid query to show only `instructor` CPT posts whose

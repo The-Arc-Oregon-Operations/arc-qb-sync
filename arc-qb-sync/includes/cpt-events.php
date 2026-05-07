@@ -35,7 +35,7 @@ function arc_qb_register_event_cpt() {
 			),
 			'public'         => true,
 			'show_in_rest'   => true,
-			'supports'       => array( 'title', 'editor', 'thumbnail', 'custom-fields' ),
+			'supports'       => array( 'title', 'editor', 'thumbnail', 'custom-fields', 'page-attributes' ),
 			'has_archive'    => false,
 			'rewrite'        => array( 'slug' => 'events' ),
 			'menu_icon'      => 'dashicons-calendar-alt',

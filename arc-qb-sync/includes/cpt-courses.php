@@ -48,7 +48,7 @@ function arc_qb_register_course_cpt() {
 			),
 			'public'              => true,
 			'show_in_rest'        => true,
-			'supports'            => array( 'title', 'editor', 'thumbnail', 'excerpt', 'custom-fields' ),
+			'supports'            => array( 'title', 'editor', 'thumbnail', 'excerpt', 'custom-fields', 'page-attributes' ),
 			'has_archive'         => false,
 			'rewrite'             => array( 'slug' => 'courses' ),
 			'menu_icon'           => 'dashicons-welcome-learn-more',

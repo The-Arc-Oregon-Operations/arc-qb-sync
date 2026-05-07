@@ -15,8 +15,8 @@
  * QB field mapping (v2.2.0):
  *   3  → _arc_qb_record_id (sync key) + post lookup
  *   6  → post_title
- *   14 → _arc_course_length_ms (raw ms) + _arc_course_length (formatted)
- *   20 → _arc_course_hours (numeric hours)
+ *   14 → _arc_course_length_ms (raw ms, archived for reference)
+ *   20 → _arc_course_hours (raw numeric hours) + _arc_course_length (formatted, e.g. "6 hours")
  *   36 → post_status: publish (TRUE) / draft (FALSE)
  *   39 → _arc_course_base_rate
  *   40 → _arc_course_delivery_method
@@ -193,7 +193,8 @@ function arc_qb_upsert_course( array $record ) {
 	$title         = arc_qb_get_course_field( $record, 6 );
 	$excerpt       = arc_qb_get_course_field( $record, 46 );
 	$public_raw    = arc_qb_get_course_field( $record, 36 );
-	$length_ms_raw = arc_qb_get_course_field( $record, 14 );
+	$length_ms_raw    = arc_qb_get_course_field( $record, 14 );
+	$length_hours_raw = arc_qb_get_course_field( $record, 20 ); // FID 20: plain numeric hours (reliable source)
 
 	// FID 92 — Slug for Website drives post_name.
 	$course_slug = sanitize_title( arc_qb_get_course_field( $record, 92 ) );
@@ -267,10 +268,21 @@ function arc_qb_upsert_course( array $record ) {
 	update_post_meta( $post_id, '_arc_qb_record_id',                    $qb_record_id );
 	update_post_meta( $post_id, '_arc_course_request_url',
 		esc_url_raw( 'https://thearcoregon.org/organization-training-request/?course=' . $qb_record_id ) );
-	update_post_meta( $post_id, '_arc_course_length_ms',                $length_ms_raw );
-	update_post_meta( $post_id, '_arc_course_length',                   arc_qb_format_duration( $length_ms_raw ) );
+	update_post_meta( $post_id, '_arc_course_length_ms', $length_ms_raw ); // FID 14 raw ms — archived, not used for display
+
+	// _arc_course_length is the display-facing formatted string (e.g. "6 hours").
+	// Derived from FID 20 (Length Num — plain numeric hours), which is more reliable
+	// than converting FID 14's Duration ms value.
+	$length_hours_num = floatval( $length_hours_raw );
+	update_post_meta( $post_id, '_arc_course_length',
+		$length_hours_num > 0
+			? rtrim( rtrim( number_format( $length_hours_num, 1 ), '0' ), '.' ) . ' hours'
+			: ''
+	);
 	update_post_meta( $post_id, '_arc_course_base_rate',                sanitize_text_field( arc_qb_get_course_field( $record, 39 ) ) );
-	update_post_meta( $post_id, '_arc_course_delivery_method',          sanitize_text_field( arc_qb_get_course_field( $record, 40 ) ) );
+	$delivery_method_raw = arc_qb_get_course_field( $record, 40 );
+	error_log( '[arc-qb-sync] Course ' . $qb_record_id . ' FID 40 raw: ' . ( is_array( $delivery_method_raw ) ? wp_json_encode( $delivery_method_raw ) : var_export( $delivery_method_raw, true ) ) );
+	update_post_meta( $post_id, '_arc_course_delivery_method', sanitize_text_field( is_array( $delivery_method_raw ) ? implode( ', ', $delivery_method_raw ) : (string) $delivery_method_raw ) );
 	update_post_meta( $post_id, '_arc_course_category',                 sanitize_text_field( arc_qb_get_course_field( $record, 43 ) ) );
 	update_post_meta( $post_id, '_arc_course_target_audience',          wp_kses_post( arc_qb_get_course_field( $record, 50 ) ) );
 	update_post_meta( $post_id, '_arc_course_learning_objectives_html', wp_kses_post( arc_qb_get_course_field( $record, 62 ) ) );
@@ -283,8 +295,8 @@ function arc_qb_upsert_course( array $record ) {
 	update_post_meta( $post_id, '_arc_course_hero_image_url',
 		esc_url_raw( arc_qb_get_course_field( $record, ARC_QB_COURSE_HERO_IMAGE_FID ) ) );     // 96
 
-	// FID 20 — Length Num (numeric hours value)
-	update_post_meta( $post_id, '_arc_course_hours', sanitize_text_field( arc_qb_get_course_field( $record, 20 ) ) );
+	// FID 20 — Length Num (numeric hours value — also used above to generate _arc_course_length)
+	update_post_meta( $post_id, '_arc_course_hours', sanitize_text_field( $length_hours_raw ) );
 
 	// FID 84 — Link to Course Overview Page
 	update_post_meta( $post_id, '_arc_course_details_url', esc_url_raw( arc_qb_get_course_field( $record, 84 ) ) );
