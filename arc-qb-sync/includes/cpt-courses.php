@@ -56,7 +56,37 @@ function arc_qb_register_course_cpt() {
 	);
 }
 
-// ── 2. Register course_tag taxonomy ──────────────────────────────────────────
+// ── 2. Default sort order ─────────────────────────────────────────────────────
+
+add_action( 'pre_get_posts', 'arc_qb_default_course_order' );
+
+/**
+ * Default sort order for `course` CPT queries on the front end.
+ *
+ * Primary:   menu_order ASC  — set any post to a negative integer (e.g. -10)
+ *            to pin it above the normal alphabetical list. Posts at the same
+ *            menu_order value sort alphabetically among themselves.
+ * Secondary: post title ASC  — alphabetical fallback within the same menu_order.
+ *
+ * Only fires when orderby has not already been set on the query, so Elementor
+ * Loop Grid custom Query IDs and explicit WP_Query args are unaffected.
+ *
+ * Convention:
+ *   menu_order = 0   → normal pool (default for all posts; sorts alphabetically)
+ *   menu_order = -10 → featured tier (floats to top; multiple items sort alpha)
+ *   menu_order = -5  → second tier if needed
+ */
+function arc_qb_default_course_order( WP_Query $query ) {
+	if ( is_admin() || $query->get( 'orderby' ) ) {
+		return;
+	}
+	if ( 'course' !== $query->get( 'post_type' ) ) {
+		return;
+	}
+	$query->set( 'orderby', array( 'menu_order' => 'ASC', 'title' => 'ASC' ) );
+}
+
+// ── 3. Register course_tag taxonomy ──────────────────────────────────────────
 
 add_action( 'init', 'arc_qb_register_course_tag_taxonomy' );
 

@@ -12,10 +12,11 @@
  *
  * QB field mapping (v3.0.0):
  *   3   → _arc_qb_event_id (sync key)
+ *   7   → _arc_event_start_date (ISO date, e.g. "2026-04-15" — used for sort order)
  *   14  → _arc_event_reg_url
  *   19  → post_title
  *   29  → _arc_event_venue
- *   45  → _arc_event_dates
+ *   45  → _arc_event_dates (formatted display text — NOT used for sorting)
  *   89  → _arc_event_time
  *   137 → post_status: publish (TRUE) / draft (FALSE)
  *   267 → _arc_event_flyer_url
@@ -74,7 +75,8 @@ function arc_qb_fetch_all_event_records() {
 	}
 
 	// Base fields — always included.
-	$select = array( 3, 14, 19, 29, 45, 89, 137, 267, 271, 361, 413, 440, 449, 450, 453, 454, 458, 461 );
+	// FID 7 = Start Date (Date type, returns ISO 8601 — used for sort order via _arc_event_start_date).
+	$select = array( 3, 7, 14, 19, 29, 45, 89, 137, 267, 271, 361, 413, 440, 449, 450, 453, 454, 458, 461 );
 
 	// Image lookup FIDs — hardcoded (stable QB schema, not wp-config).
 	$select = array_merge( $select, array( 464, 466 ) );
@@ -186,6 +188,11 @@ function arc_qb_upsert_event( array $record ) {
 	// ── Update post meta ──────────────────────────────────────────────────────
 
 	update_post_meta( $post_id, '_arc_qb_event_id',                  $qb_event_id );
+
+	// FID 7 — Start Date (QB Date field, returns ISO 8601 e.g. "2026-04-15").
+	// Stored as-is for reliable chronological meta_value sort in pre_get_posts.
+	update_post_meta( $post_id, '_arc_event_start_date',             sanitize_text_field( arc_qb_get_course_field( $record, 7 ) ) );
+
 	update_post_meta( $post_id, '_arc_event_reg_url',                esc_url_raw( arc_qb_get_course_field( $record, 14 ) ) );
 	update_post_meta( $post_id, '_arc_event_venue',                  sanitize_text_field( arc_qb_get_course_field( $record, 29 ) ) );
 	$event_dates    = sanitize_text_field( arc_qb_get_course_field( $record, 45 ) );

@@ -25,36 +25,51 @@ if ( ! defined( 'ABSPATH' ) ) {
 add_action( 'elementor/query/arc_courses_by_menu_order', 'arc_qb_elementor_query_courses_by_menu_order' );
 
 function arc_qb_elementor_query_courses_by_menu_order( $query ) {
-	$query->set( 'orderby', 'menu_order' );
-	$query->set( 'order',   'ASC' );
+	$query->set( 'orderby', array( 'menu_order' => 'ASC', 'title' => 'ASC' ) );
 }
 
 /**
  * Query ID: arc_instructors_by_menu_order
  *
- * Sorts a Loop Grid query of `instructor` CPT posts by menu_order (ascending).
+ * Sorts by menu_order ASC, then title ASC. Matches the CPT default order.
+ * Negative menu_order values float to the top; all others sort alphabetically.
  *
  * Usage: Set Loop Grid → Query → Source to "Custom" and Query ID to "arc_instructors_by_menu_order".
  */
 add_action( 'elementor/query/arc_instructors_by_menu_order', 'arc_qb_elementor_query_instructors_by_menu_order' );
 
 function arc_qb_elementor_query_instructors_by_menu_order( $query ) {
-	$query->set( 'orderby', 'menu_order' );
-	$query->set( 'order',   'ASC' );
+	$query->set( 'orderby', array( 'menu_order' => 'ASC', 'title' => 'ASC' ) );
+}
+
+/**
+ * Query ID: arc_events_by_date
+ *
+ * Sorts a Loop Grid query of `arc_event` CPT posts by start date ascending
+ * (earliest event first). Matches the CPT default order.
+ *
+ * Usage: Set Loop Grid → Query → Source to "Custom" and Query ID to "arc_events_by_date".
+ */
+add_action( 'elementor/query/arc_events_by_date', 'arc_qb_elementor_query_events_by_date' );
+
+function arc_qb_elementor_query_events_by_date( $query ) {
+	$query->set( 'meta_key', '_arc_event_start_date' );
+	$query->set( 'orderby',  'meta_value' );
+	$query->set( 'order',    'ASC' );
 }
 
 /**
  * Query ID: arc_events_by_menu_order
  *
- * Sorts a Loop Grid query of `arc_event` CPT posts by menu_order (ascending).
+ * Sorts by menu_order ASC, then title ASC. Use when you want manual pinning
+ * control over the event list order rather than date-based sorting.
  *
  * Usage: Set Loop Grid → Query → Source to "Custom" and Query ID to "arc_events_by_menu_order".
  */
 add_action( 'elementor/query/arc_events_by_menu_order', 'arc_qb_elementor_query_events_by_menu_order' );
 
 function arc_qb_elementor_query_events_by_menu_order( $query ) {
-	$query->set( 'orderby', 'menu_order' );
-	$query->set( 'order',   'ASC' );
+	$query->set( 'orderby', array( 'menu_order' => 'ASC', 'title' => 'ASC' ) );
 }
 
 /**

@@ -13,6 +13,26 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 add_action( 'init', 'arc_qb_register_instructor_cpt' );
+add_action( 'pre_get_posts', 'arc_qb_default_instructor_order' );
+
+/**
+ * Default sort order for `instructor` CPT queries on the front end.
+ *
+ * Primary:   menu_order ASC  — set to a negative integer (e.g. -10) to pin
+ *            an instructor above the alphabetical list (e.g. featured speakers).
+ * Secondary: post title ASC  — alphabetical fallback within the same menu_order.
+ *
+ * Only fires when orderby has not already been set on the query.
+ */
+function arc_qb_default_instructor_order( WP_Query $query ) {
+	if ( is_admin() || $query->get( 'orderby' ) ) {
+		return;
+	}
+	if ( 'instructor' !== $query->get( 'post_type' ) ) {
+		return;
+	}
+	$query->set( 'orderby', array( 'menu_order' => 'ASC', 'title' => 'ASC' ) );
+}
 
 function arc_qb_register_instructor_cpt() {
 	register_post_type(

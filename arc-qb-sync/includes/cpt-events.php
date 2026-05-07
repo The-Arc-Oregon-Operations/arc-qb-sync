@@ -17,6 +17,31 @@ if ( ! defined( 'ABSPATH' ) ) {
 // ── CPT registration ──────────────────────────────────────────────────────────
 
 add_action( 'init', 'arc_qb_register_event_cpt' );
+add_action( 'pre_get_posts', 'arc_qb_default_event_order' );
+
+/**
+ * Default sort order for `arc_event` CPT queries on the front end.
+ *
+ * Sorts by _arc_event_start_date (QB FID 7 — Start Date, a proper Date field)
+ * ascending — earliest event first.
+ *
+ * FID 7 returns ISO 8601 (e.g. "2026-04-15") via the QB REST API, making it
+ * reliable for string-based chronological sorting. FID 45 "Event Date(s)" is a
+ * Text field containing a formatted display string and is NOT used for sorting.
+ *
+ * Only fires when orderby has not already been set on the query.
+ */
+function arc_qb_default_event_order( WP_Query $query ) {
+	if ( is_admin() || $query->get( 'orderby' ) ) {
+		return;
+	}
+	if ( 'arc_event' !== $query->get( 'post_type' ) ) {
+		return;
+	}
+	$query->set( 'meta_key', '_arc_event_start_date' );
+	$query->set( 'orderby',  'meta_value' );
+	$query->set( 'order',    'ASC' );
+}
 
 function arc_qb_register_event_cpt() {
 	register_post_type(
