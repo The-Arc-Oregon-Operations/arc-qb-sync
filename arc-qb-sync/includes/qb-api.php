@@ -140,7 +140,11 @@ function arc_qb_sync_set_featured_image( $post_id, array $args ) {
 
 	// ── Miss path: need to sideload ───────────────────────────────────────────
 	if ( 'Approved' !== $review_status ) {
-		if ( $review_status ) {
+		if ( '' === $review_status ) {
+			// Empty means the FK field is unpopulated (no IA record linked) or the lookup
+			// returned nothing. Log so this is diagnosable from the error log.
+			error_log( "[arc-qb-sync] {$label}: review_status empty — no IA record linked or lookup returned nothing; sideload skipped." );
+		} else {
 			error_log( "[arc-qb-sync] {$label}: review gate ({$review_status}) — sideload skipped." );
 		}
 		delete_post_thumbnail( $post_id );
@@ -157,7 +161,7 @@ function arc_qb_sync_set_featured_image( $post_id, array $args ) {
 	$public_url        = '';
 
 	// ── Attempt 1: QB file attachment download ────────────────────────────────
-	if ( $ia_record_id > 0 && defined( 'ARC_QB_IA_FID_FILE' ) && ARC_QB_IA_FID_FILE > 0 ) {
+	if ( $ia_record_id > 0 && defined( 'QB_IMAGE_ASSETS_TABLE_ID' ) && defined( 'ARC_QB_IA_FID_FILE' ) && ARC_QB_IA_FID_FILE > 0 ) {
 		$file = arc_qb_download_image_file(
 			QB_IMAGE_ASSETS_TABLE_ID,
 			$ia_record_id,
