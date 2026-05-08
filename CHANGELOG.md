@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.8.5] — 2026-05-07
+
+### Fixed
+- `qb-api.php`: `arc_qb_sync_set_featured_image()` — fast path now validates the stored attachment ID with `wp_attachment_is_image()` before calling `set_post_thumbnail()`. Previously, a deleted or replaced WP Media attachment would cause `set_post_thumbnail()` to write a stale `_thumbnail_id`, which WP silently ignores, leaving the course with no visible featured image even after repeated syncs. When a stale ID is detected, the function logs it and falls through to the sideload path so the correct attachment can be re-acquired and written back to QB in the same sync run.
+
+---
+
 ## [3.7.1] — 2026-04-25
 
 ### Fixed

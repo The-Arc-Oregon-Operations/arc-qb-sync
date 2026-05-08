@@ -134,8 +134,14 @@ function arc_qb_sync_set_featured_image( $post_id, array $args ) {
 
 	// ── Fast path: attachment ID already stored ───────────────────────────────
 	if ( $attachment_id > 0 ) {
-		set_post_thumbnail( $post_id, $attachment_id );
-		return;
+		if ( wp_attachment_is_image( $attachment_id ) ) {
+			set_post_thumbnail( $post_id, $attachment_id );
+			return;
+		}
+		// Stale ID — the attachment was deleted or replaced in WP Media.
+		// Log it and fall through to the sideload path to re-acquire.
+		// If sideload succeeds this run, the correct ID is written back to QB.
+		error_log( "[arc-qb-sync] {$label}: stored attachment ID {$attachment_id} no longer exists in WP — falling through to sideload." );
 	}
 
 	// ── Miss path: need to sideload ───────────────────────────────────────────
