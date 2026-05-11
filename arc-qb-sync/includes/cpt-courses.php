@@ -68,8 +68,9 @@ add_action( 'pre_get_posts', 'arc_qb_default_course_order' );
  *            menu_order value sort alphabetically among themselves.
  * Secondary: post title ASC  — alphabetical fallback within the same menu_order.
  *
- * Only fires when orderby has not already been set on the query, so Elementor
- * Loop Grid custom Query IDs and explicit WP_Query args are unaffected.
+ * Exits early when the query already targets a specific meta_key — protects
+ * lookup queries such as the legacy ?course-id= redirect (below in this file)
+ * and any other code path that queries the `course` CPT by an exact meta value.
  *
  * Convention:
  *   menu_order = 0   → normal pool (default for all posts; sorts alphabetically)
@@ -81,6 +82,10 @@ function arc_qb_default_course_order( WP_Query $query ) {
 		return;
 	}
 	if ( 'course' !== $query->get( 'post_type' ) ) {
+		return;
+	}
+	// Don't clobber lookup queries that target a specific meta_key.
+	if ( $query->get( 'meta_key' ) ) {
 		return;
 	}
 	$query->set( 'orderby', array( 'menu_order' => 'ASC', 'title' => 'ASC' ) );

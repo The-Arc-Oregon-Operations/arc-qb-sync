@@ -22,13 +22,18 @@ add_action( 'pre_get_posts', 'arc_qb_default_instructor_order' );
  *            an instructor above the alphabetical list (e.g. featured speakers).
  * Secondary: post title ASC  — alphabetical fallback within the same menu_order.
  *
- * Only fires when orderby has not already been set on the query.
+ * Exits early when the query already targets a specific meta_key — protects
+ * any lookup query that filters instructors by an exact meta value.
  */
 function arc_qb_default_instructor_order( WP_Query $query ) {
 	if ( is_admin() ) {
 		return;
 	}
 	if ( 'instructor' !== $query->get( 'post_type' ) ) {
+		return;
+	}
+	// Don't clobber lookup queries that target a specific meta_key.
+	if ( $query->get( 'meta_key' ) ) {
 		return;
 	}
 	$query->set( 'orderby', array( 'menu_order' => 'ASC', 'title' => 'ASC' ) );

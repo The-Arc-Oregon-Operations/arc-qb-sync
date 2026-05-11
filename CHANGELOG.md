@@ -1,5 +1,17 @@
 # Changelog
 
+## [3.8.6] — 2026-05-11
+
+### Fixed
+- `cpt-events.php`: `arc_qb_default_event_order()` — added `meta_key` guard so the `pre_get_posts` hook no longer clobbers internal lookup queries. Without the guard, the hook unconditionally rewrote `meta_key` to `_arc_event_start_date` on every front-end `arc_event` query, which broke the `?event-id=` bridge in `arc_qb_get_event_post_id()` (queries by `_arc_qb_event_id`). Result: every `[event_*]` shortcode on legacy `/training-details/?event-id=NNNN` pages was returning an empty string. Regression introduced in v3.8.4 when the `orderby` guard was removed from the same function. Docblock updated to reflect actual behavior.
+- `cpt-courses.php`: `arc_qb_default_course_order()` — same `meta_key` guard added defensively (function does not currently clobber `meta_key`, but the guard prevents future regressions and is consistent with the events fix). Docblock updated.
+- `cpt-instructors.php`: `arc_qb_default_instructor_order()` — same `meta_key` guard added defensively. Docblock updated.
+
+### Notes
+- v3.8.4's intent (CPT default sort overrides Elementor's archive sort) is preserved — Elementor archive / Loop Grid queries do not set `meta_key`, so the new guard does not fire on those.
+
+---
+
 ## [3.8.5] — 2026-05-07
 
 ### Fixed

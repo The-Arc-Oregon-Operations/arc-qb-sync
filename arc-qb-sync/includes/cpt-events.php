@@ -29,13 +29,21 @@ add_action( 'pre_get_posts', 'arc_qb_default_event_order' );
  * reliable for string-based chronological sorting. FID 45 "Event Date(s)" is a
  * Text field containing a formatted display string and is NOT used for sorting.
  *
- * Only fires when orderby has not already been set on the query.
+ * Exits early when the query already targets a specific meta_key. This protects
+ * internal lookup queries — most notably the ?event-id= bridge in
+ * shortcodes-events-cpt.php (arc_qb_get_event_post_id), which queries by
+ * _arc_qb_event_id meta and would otherwise have its meta_key clobbered to
+ * _arc_event_start_date, breaking the legacy /training-details/?event-id= pages.
  */
 function arc_qb_default_event_order( WP_Query $query ) {
 	if ( is_admin() ) {
 		return;
 	}
 	if ( 'arc_event' !== $query->get( 'post_type' ) ) {
+		return;
+	}
+	// Don't clobber lookup queries that target a specific meta_key.
+	if ( $query->get( 'meta_key' ) ) {
 		return;
 	}
 	$query->set( 'meta_key', '_arc_event_start_date' );
