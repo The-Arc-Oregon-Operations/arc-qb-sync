@@ -156,7 +156,13 @@ shipped_version: X.Y.Z
 7. **What NOT to Change** — named exclusions. Stops Code from drifting into out-of-scope refactors.
 8. **Manual tests** (optional) — small table of pre-/post-conditions to exercise live against the running site after merge. Include when the change is observable end-to-end.
 
-**After ship:** don't delete the prompt. Flip its front-matter `status` to `shipped`, add `shipped:` and `shipped_version:`, and leave the file in the repo root as the decision record. The session note should reference the prompt file directly.
+**After ship:** don't delete the prompt. Flip its front-matter `status` to `shipped`, add `shipped:` and `shipped_version:`, and **move the file from the repo root to `_archive/code-prompts/`** as the decision record. Add a one-line italic header below the front matter: `_Shipped YYYY-MM-DD; paths and concepts in this document reflect the state at ship time. Refer to CLAUDE.md for current state._` This stops a fresh session from misreading a stale orchestration prompt as a current task list — the prompt body stays as it shipped (decision record), but the header makes the time-of-write framing explicit. The session note references the prompt by filename — bare filenames resolve fine since `_archive/code-prompts/` is the only place a shipped prompt lives.
+
+Killed-without-shipping prompts also live in `_archive/code-prompts/` with `status: archived` and an `archived_reason:` line in the front matter. The prompt's `status` field distinguishes between shipped and archived prompts in the same folder.
+
+In-flight prompts (`status: draft | in-development | ready-for-code`) live at the repo root so a fresh Code session sees them first. Only shipped or archived prompts move into `_archive/code-prompts/`.
+
+Existing shipped `CLAUDE_CODE_PROMPT_v*.md` files at repo root from before this convention was adopted can be retro-migrated to `_archive/code-prompts/` in a one-time hygiene pass; not urgent.
 
 ---
 
@@ -190,7 +196,7 @@ At the end of any Code session that changed plugin files, in this order:
 4. Add a session note to `sessions/` — not optional. Include branch name and commit SHA.
 5. Commit to the `claude/*` branch and push to `origin`.
 6. Open the PR. Preferred: `gh pr create` directly. Acceptable fallback: Claude Code's `/create-pr` skill. Return the PR URL to Alan in the final chat message.
-7. Flip the CLAUDE_CODE_PROMPT_vX.Y.Z.md front matter to `shipped` + add `shipped:` / `shipped_version:`. Leave the file in place as the decision record.
+7. Flip the CLAUDE_CODE_PROMPT_vX.Y.Z.md front matter to `shipped`, add `shipped:` + `shipped_version:`, move the file from the repo root to `_archive/code-prompts/`, and add the one-line italic header below the front matter. See "Orchestration Prompt Format" → After ship for the exact pattern.
 8. Alan reviews + merges in-browser, deletes the remote branch there, pulls `main` via GitHub Desktop, then runs the post-merge cleanup block (below) on his Windows box. This is a human step — Code does not merge.
 
 **Canonical PR command (Code runs this directly — do not ask first):**
@@ -216,6 +222,63 @@ On Unix the line continuations are `\` instead of backticks; `--body-file` behav
   - Link to the shipped CLAUDE_CODE_PROMPT_vX.Y.Z.md.
 
 **If a Code session must end before all of these steps are complete:** at minimum, write the session note with whatever was done, commit to `claude/*`, and push. A session that wrote code but left no commit trail is a bug, not a feature. If only the PR step didn't complete, say so explicitly and paste the exact `gh pr create` command Alan can run.
+
+---
+
+## Cowork mount sync caveats
+
+Cowork sessions edit your mounted folder directly through a sync layer. Within a single session, that layer can lag behind your real-time edits — two observable symptoms:
+
+1. **Stale mtime even when content has changed.** Claude reads a file mid-session, the file's mtime claims the same value it had earlier, but you actually saved an updated version. Claude's read may capture the new content on a later re-read while the mtime never moves.
+2. **Edits not propagating at all within the session.** You re-save a file on your machine; Claude sees it unchanged in size, content, and mtime. The edit hasn't crossed the sync layer yet.
+
+**The reliable signal: a fresh session always sees current state.** If you save (or commit) and then start a new Cowork session, the new session mounts fresh and reads everything correctly. The friction is purely *within-session*, not across sessions.
+
+When Claude's read disagrees with what you report, default conclusion is "the sync is stale," not "the user is mistaken." Diagnostic pattern Claude should use:
+
+1. State exactly what it's reading before drawing conclusions — "I see this file at N bytes, mtime X — does that match what you see?"
+2. Triangulate beyond mtime — compute `sha256sum`, file size, and a content fingerprint (specific lines or section names). Mtime is unreliable across the mount; content sha is more honest.
+3. Use `git status` as the synchronization point — git diffs against object content, so it's robust to the mtime weirdness. If your machine sees `M path/to/file` and Claude's sandbox sees no changes, the sync hasn't propagated.
+4. When in doubt, the hard reset is: commit locally and start a new Cowork session. The new session's first read is correct every time.
+
+---
+
+## Closing a session — trigger rule
+
+Claude never starts the session-closing sequence (session note, doc sweep, commit message) until Alan explicitly says to close the session — e.g. "wrap up," "close the session," "let's close," "ok go ahead," or similar phrasing. Claude may *suggest* closing when the work seems naturally complete, but must wait for the go-ahead before doing any closing steps.
+
+A suggestion sounds like: "Looks like a good stopping point — want me to close the session?" — then stop. Don't draft a commit message preemptively; don't write the session note yet; don't run the doc sweep. The suggestion is the action; the close is Alan's call.
+
+Enthusiasm, urgency, or added detail in Alan's message is not a close signal. The trigger phrase is.
+
+---
+
+## Pre-commit doc sweep
+
+Before drafting any commit message, if the session renamed, retired, replaced, moved, or completed anything that other docs reference (a file, a folder, a status value, a convention name, a setting key, a function name, an open item that's now resolved), grep the touched repo(s) for the old name or stale claim and confirm every downstream reference is updated or annotated as legacy/historical with a date.
+
+This is the systematic fix for the "stale doc read as current" failure mode: a session ships work that changes reality, but the doc that the next window opens still describes the old reality. Subsequent windows build against the wrong picture. The doc sweep catches this at the producing session, not the consuming one.
+
+Grep targets vary by repo, but common ones: `CLAUDE.md`, `README.md`, sprint orchestrator or status docs, architecture or spec docs, session-folder docs, and any README inside an `_archive/` folder. If a stale claim can't be updated cleanly in the moment, annotate it as legacy with a date rather than leaving it as a true-looking false claim.
+
+---
+
+## Closing-message formatting (applies to every Cowork session)
+
+The end-of-session message is the handoff. Format it for fast scanning and clean copy-paste — Alan reads it once and acts.
+
+**Repo callouts in prose.** Mark up the repo that was *touched* in backticks. Untouched repos referenced as context get no backticks. The backtick formatting is the visual signal of "this is where the work lives."
+
+Right: `` `event-management` repo. (arc-event-reg had no changes in this session.) ``
+Wrong: `` event-management repo only — `arc-event-reg` had no changes. ``
+
+When multiple repos were touched, mark up each one. When only one was touched and others are referenced for context only, only the touched one gets backticks.
+
+**Commit messages in separate code blocks.** When producing a commit message, put the subject and the description in two separate fenced code blocks, each independently copy-pasteable. Do not combine them into a single block. Label them `Subject:` and `Description:` above each block.
+
+This applies whether the commit message is for one repo or several. One subject + description pair per repo, each pair in two blocks.
+
+**One commit per repo touched.** Per the Confirmed working pattern (separate commits per repo), if a Cowork session touched two repos, produce two subject blocks and two description blocks, clearly grouped under the relevant repo callout.
 
 ---
 
