@@ -34,13 +34,13 @@ function arc_td_has_quickbase_config() {
  *   89  = Event Time
  *   19  = Event Title
  *   29  = Venue Name
- *   271 = Instructor(s)
+ *   422 = Event Instructor(s) (rich-text; library Phase 1)
  *   361 = Credit Hours
  *   440 = Event Description (long text)
  *   450 = Training Cost
  *   14  = Add Registration (URL)
  *   413 = Day(s) of Week
- *   458 = Event Mode
+ *   458 = Event Delivery Mode
  *   461 = Featured Image URL
  *   267 = Flyer URL
  *   449 = Instructor slugs (e.g. "nkaasa|ldutton")
@@ -75,13 +75,13 @@ function arc_td_get_current_record() {
 			89,  // Event Time
 			19,  // Event Title
 			29,  // Venue Name
-			271, // Instructor(s)
+			422, // Event Instructor(s) (rich-text; library Phase 1)
 			361, // Credit Hours
 			440, // Event Description (long)
 			450, // Training Cost
 			14,  // Add Registration (URL)
 			413, // Day(s) of Week
-			458, // Event Mode
+			458, // Event Delivery Mode
 			461, // Featured Image URL
 			267, // Flyer URL
 			449, // Instructor slugs (e.g. "nkaasa|ldutton")

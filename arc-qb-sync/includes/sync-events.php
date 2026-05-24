@@ -20,7 +20,7 @@
  *   89  → _arc_event_time
  *   137 → post_status: publish (TRUE) / draft (FALSE)
  *   267 → _arc_event_flyer_url
- *   271 → _arc_event_instructors_legacy
+ *   422 → _arc_event_instructors (rich-text; Oxford-comma chain over Instructor 1/2/3)
  *   361 → _arc_event_length
  *   413 → _arc_event_days_of_week
  *   440 → _arc_event_description
@@ -32,7 +32,6 @@
  *   461 → _arc_event_image_url (legacy manual field)
  *   464 → _arc_event_featured_image_url
  *   466 → _arc_event_hero_image_url
- *   computed → _arc_event_schedule (FIDs 413 + 45 concatenated with ' • ')
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -76,7 +75,7 @@ function arc_qb_fetch_all_event_records() {
 
 	// Base fields — always included.
 	// FID 7 = Start Date (Date type, returns ISO 8601 — used for sort order via _arc_event_start_date).
-	$select = array( 3, 7, 14, 19, 29, 45, 89, 137, 267, 271, 361, 413, 440, 449, 450, 453, 454, 458, 461 );
+	$select = array( 3, 7, 14, 19, 29, 45, 89, 137, 267, 361, 413, 422, 440, 449, 450, 453, 454, 458, 461 );
 
 	// Image lookup FIDs — hardcoded (stable QB schema, not wp-config).
 	$select = array_merge( $select, array( 464, 466 ) );
@@ -201,13 +200,9 @@ function arc_qb_upsert_event( array $record ) {
 	update_post_meta( $post_id, '_arc_event_dates',        $event_dates );
 	update_post_meta( $post_id, '_arc_event_days_of_week', $days_of_week );
 
-	// Concatenated schedule display string.
-	$parts = array_filter( array( $days_of_week, $event_dates ) );
-	update_post_meta( $post_id, '_arc_event_schedule', implode( ' • ', $parts ) );
-
 	update_post_meta( $post_id, '_arc_event_time',                   sanitize_text_field( arc_qb_get_course_field( $record, 89 ) ) );
 	update_post_meta( $post_id, '_arc_event_flyer_url',              esc_url_raw( arc_qb_get_course_field( $record, 267 ) ) );
-	update_post_meta( $post_id, '_arc_event_instructors_legacy',     sanitize_text_field( arc_qb_get_course_field( $record, 271 ) ) );
+	update_post_meta( $post_id, '_arc_event_instructors',            wp_kses_post( arc_qb_get_course_field( $record, 422 ) ) );
 	update_post_meta( $post_id, '_arc_event_length',                 sanitize_text_field( arc_qb_get_course_field( $record, 361 ) ) );
 	update_post_meta( $post_id, '_arc_event_description',            wp_kses_post( arc_qb_get_course_field( $record, 440 ) ) );
 	update_post_meta( $post_id, '_arc_event_instructor_slugs_legacy', sanitize_text_field( arc_qb_get_course_field( $record, 449 ) ) );

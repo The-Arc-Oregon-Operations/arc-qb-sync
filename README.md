@@ -15,14 +15,13 @@ Used on `/training-details/?event-id=NNNN` pages.
 | `[event_title]` | Event Title | Escaped text |
 | `[event_dates]` | Event Date(s) | Escaped text |
 | `[event_time]` | Event Time | Escaped text |
-| `[event_schedule]` | Computed: Day(s) of Week + " • " + Date(s) | Escaped text |
 | `[venue_name]` | Venue Name | Escaped text |
-| `[instructors]` | Instructor(s) | Escaped text |
+| `[instructors]` | Event Instructor(s) (FID 422) | Safe HTML (bold tags via `wp_kses_post`) |
 | `[training_cost]` | Training Cost | Safe HTML (links, bold, etc.) |
 | `[event_description]` | Event Description | HTML via `wp_kses_post` |
 | `[add_registration_url]` | Registration URL | Escaped URL |
 | `[event_days_of_week]` | Day(s) of Week | Escaped text |
-| `[event_mode]` | Event Mode | Escaped text |
+| `[event_mode]` | Event Delivery Mode | Escaped text |
 | `[featured_image_url]` | Featured Image URL | Escaped URL |
 | `[flyer_url]` | Flyer URL | Escaped URL |
 | `[instructor_slugs]` | Instructor Slugs (pipe-sep.) | Escaped text |

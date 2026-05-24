@@ -83,11 +83,11 @@ function arc_td_shortcode_event_venue() {
 }
 add_shortcode( 'venue_name', 'arc_td_shortcode_event_venue' ); // Pre-v2.2.0 alias — remove when legacy pages are retired
 
-// Instructor(s) plain text (FID 271)
+// Instructor(s) — rich-text from FID 422 Event Instructor(s) library entry (v3.9.0+; was FID 271 legacy through v3.8.6)
 function arc_td_shortcode_event_instructors() {
-	return esc_html( arc_td_get_field_value( 271 ) );
+	return wp_kses_post( arc_td_get_field_value( 422 ) );
 }
-add_shortcode( 'instructors', 'arc_td_shortcode_event_instructors' ); // Pre-v2.2.0 alias — remove when legacy pages are retired
+add_shortcode( 'instructors', 'arc_td_shortcode_event_instructors' ); // Retained — used on legacy /training-details/?event-id=NNNN pages
 
 // ── [event_price] / [training_cost] ───────────────────────────────────────────
 

@@ -153,7 +153,7 @@ function arc_qb_sc_course_length() {
 	return esc_html( get_post_meta( $post_id, '_arc_course_length', true ) );
 }
 
-/* Length Num (numeric hours value — FID 20) */
+/* Length (number) (numeric hours value — FID 20) */
 function arc_qb_sc_course_hours() {
 	$post_id = arc_qb_get_course_post_id();
 	if ( ! $post_id ) {

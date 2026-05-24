@@ -20,7 +20,6 @@
  *   [event_time]                      / [arc_event_time]                     — _arc_event_time
  *   [event_venue]                     / [arc_event_venue]                    — _arc_event_venue
  *   [event_days_of_week]              / [arc_event_days_of_week]             — _arc_event_days_of_week
- *   [event_schedule]                                                         — _arc_event_schedule (computed: days_of_week + ' • ' + dates)
  *   [event_mode]                      / [arc_event_mode]                     — _arc_event_mode
  *   [event_length]                    / [arc_event_length]                   — _arc_event_length
  *   [event_description]               / [arc_event_description]              — _arc_event_description
@@ -30,7 +29,8 @@
  *   [event_image_url]                 / [arc_event_image_url]                — _arc_event_image_url (legacy manual URL)
  *   [event_featured_image_url]        / [arc_event_featured_image_url]       — _arc_event_featured_image_url
  *   [event_hero_image_url]            / [arc_event_hero_image_url]           — _arc_event_hero_image_url
- *   [event_instructors_legacy]        / [arc_event_instructors_legacy]       — _arc_event_instructors_legacy
+ *   [event_instructors]               / [arc_event_instructors]              — _arc_event_instructors (FID 422, rich-text; v3.9.0+)
+ *   [event_instructors_legacy]        / [arc_event_instructors_legacy]       — DEPRECATED v3.9.0 — alias to [event_instructors]; remove in a future release
  *   [event_instructor_slugs_legacy]   / [arc_event_instructor_slugs_legacy]  — _arc_event_instructor_slugs_legacy
  *   [event_is_multiday]               / [arc_event_is_multiday]              — _arc_event_is_multiday ("1" or "0")
  *   [event_is_multisession]           / [arc_event_is_multisession]          — _arc_event_is_multisession ("1" or "0")
@@ -150,14 +150,6 @@ function arc_qb_sc_event_days_of_week() {
 	return esc_html( (string) get_post_meta( $post_id, '_arc_event_days_of_week', true ) );
 }
 
-function arc_qb_sc_event_schedule() {
-	$post_id = arc_qb_get_event_post_id();
-	if ( ! $post_id ) {
-		return '';
-	}
-	return esc_html( (string) get_post_meta( $post_id, '_arc_event_schedule', true ) );
-}
-
 function arc_qb_sc_event_mode() {
 	$post_id = arc_qb_get_event_post_id();
 	if ( ! $post_id ) {
@@ -246,12 +238,18 @@ function arc_qb_sc_event_hero_image_url() {
 	return esc_url( (string) get_post_meta( $post_id, '_arc_event_hero_image_url', true ) );
 }
 
-function arc_qb_sc_event_instructors_legacy() {
+function arc_qb_sc_event_instructors() {
 	$post_id = arc_qb_get_event_post_id();
 	if ( ! $post_id ) {
 		return '';
 	}
-	return esc_html( (string) get_post_meta( $post_id, '_arc_event_instructors_legacy', true ) );
+	return wp_kses_post( (string) get_post_meta( $post_id, '_arc_event_instructors', true ) );
+}
+
+// DEPRECATED v3.9.0 — alias to arc_qb_sc_event_instructors. Reads the new meta key.
+// Retained one release for templates that still reference the legacy name. Remove in a future minor.
+function arc_qb_sc_event_instructors_legacy() {
+	return arc_qb_sc_event_instructors();
 }
 
 function arc_qb_sc_event_instructor_slugs_legacy() {
@@ -322,7 +320,6 @@ function arc_qb_register_event_shortcodes() {
 	add_shortcode( 'event_time',                     'arc_qb_sc_event_time' );
 	add_shortcode( 'event_venue',                    'arc_qb_sc_event_venue' );
 	add_shortcode( 'event_days_of_week',             'arc_qb_sc_event_days_of_week' );
-	add_shortcode( 'event_schedule',                 'arc_qb_sc_event_schedule' );
 	add_shortcode( 'event_mode',                     'arc_qb_sc_event_mode' );
 	add_shortcode( 'event_length',                   'arc_qb_sc_event_length' );
 	add_shortcode( 'event_description',              'arc_qb_sc_event_description' );
@@ -332,6 +329,7 @@ function arc_qb_register_event_shortcodes() {
 	add_shortcode( 'event_image_url',                'arc_qb_sc_event_image_url' );
 	add_shortcode( 'event_featured_image_url',       'arc_qb_sc_event_featured_image_url' );
 	add_shortcode( 'event_hero_image_url',           'arc_qb_sc_event_hero_image_url' );
+	add_shortcode( 'event_instructors',              'arc_qb_sc_event_instructors' );
 	add_shortcode( 'event_instructors_legacy',       'arc_qb_sc_event_instructors_legacy' );
 	add_shortcode( 'event_instructor_slugs_legacy',  'arc_qb_sc_event_instructor_slugs_legacy' );
 	add_shortcode( 'event_is_multiday',              'arc_qb_sc_event_is_multiday' );
@@ -354,6 +352,7 @@ function arc_qb_register_event_shortcodes() {
 	add_shortcode( 'arc_event_image_url',                'arc_qb_sc_event_image_url' );
 	add_shortcode( 'arc_event_featured_image_url',       'arc_qb_sc_event_featured_image_url' );
 	add_shortcode( 'arc_event_hero_image_url',           'arc_qb_sc_event_hero_image_url' );
+	add_shortcode( 'arc_event_instructors',              'arc_qb_sc_event_instructors' );
 	add_shortcode( 'arc_event_instructors_legacy',       'arc_qb_sc_event_instructors_legacy' );
 	add_shortcode( 'arc_event_instructor_slugs_legacy',  'arc_qb_sc_event_instructor_slugs_legacy' );
 	add_shortcode( 'arc_event_is_multiday',              'arc_qb_sc_event_is_multiday' );

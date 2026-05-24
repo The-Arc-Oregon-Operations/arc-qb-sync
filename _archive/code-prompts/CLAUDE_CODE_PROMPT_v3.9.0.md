@@ -1,11 +1,15 @@
 ---
-status: ready-for-code
+status: shipped
 started: 2026-05-24
 owner: Alan Lytle
 target_version: 3.9.0
+shipped: 2026-05-24
+shipped_version: 3.9.0
 ---
 
 # CLAUDE_CODE_PROMPT_v3.9.0.md — Library Phase 2 consumer migration
+
+_Shipped 2026-05-24; paths and concepts in this document reflect the state at ship time. Refer to CLAUDE.md for current state._
 
 ## What You Are Doing and Why
 
