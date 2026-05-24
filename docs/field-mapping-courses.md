@@ -15,7 +15,7 @@
 | 3 | Record ID# | `_arc_qb_record_id` | `[course_id]` | Sync key; used in `{3.EX.NNNN}` QB query |
 | 6 | Course Title | `post_title` | `[course_title]` | Also drives `<img alt>` in catalog tiles |
 | 14 | Hours of Instruction | `_arc_course_length_ms` (raw ms) + `_arc_course_length` (formatted) | `[course_length]` | Formatted by `arc_qb_format_duration()`, e.g. "6.5 hours" |
-| 20 | Length (number) | `_arc_course_hours` | `[course_hours]` | Numeric hours value. Renamed 2026-05-22 (event-management) from `Length Num` → `Length (number)`. Plugin reads by FID number; no code change needed but inline comments in `sync-courses.php` (lines 156, 274, 298) and `shortcodes-courses.php` still reference the old name — slated for a future Code session sweep. |
+| 20 | Length (number) | `_arc_course_hours` | `[course_hours]` | Numeric hours value. Renamed 2026-05-22 (event-management) from `Length Num` → `Length (number)`. Plugin reads by FID number; inline comments refreshed in v3.9.0 (2026-05-24). |
 | 36 | Public Listing | `post_status` (publish / draft) | *(visibility flag)* | `true` = publish; `false` = draft existing post; never create non-public posts |
 | 39 | Base Rate | `_arc_course_base_rate` | `[course_base_rate]` | Renamed from `course_payment` in v2.2.0 |
 | 40 | Delivery Method | `_arc_course_delivery_method` | `[course_delivery_method]` | |

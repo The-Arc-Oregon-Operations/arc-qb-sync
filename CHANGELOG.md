@@ -1,5 +1,24 @@
 # Changelog
 
+## [3.9.0] — 2026-05-24
+
+### Changed
+- `[instructors]` (QB-direct) and `[event_instructors]` (CPT) now read FID 422 *Event Instructor(s)* (rich-text Oxford-comma composite from Instructor 1/2/3 chain) instead of FID 271 *Instructor(s) - legacy*. Sanitizer swap from `esc_html` / `sanitize_text_field` to `wp_kses_post` to preserve the `<b>` tags FID 422 emits. Phase 2 of the Events display field library.
+- WP meta key `_arc_event_instructors_legacy` renamed to `_arc_event_instructors`. Legacy meta key no longer populated by sync; consider a one-time `wp post meta delete --posts arc_event --meta-key=_arc_event_instructors_legacy --all` to clean up the dead key.
+- CPT shortcode `[arc_event_instructors_legacy]` (and `[event_instructors_legacy]`) deprecated — both now alias to `[event_instructors]` and read the new meta. Slated for removal in a future minor.
+
+### Added
+- New CPT shortcode `[event_instructors]` (primary) and `[arc_event_instructors]` (alias) — preferred names going forward.
+
+### Removed
+- Computed `_arc_event_schedule` post meta + `[event_schedule]` shortcode + `'schedule'` Elementor picker entry. Confirmed dormant 2026-05-21; live-DB grep confirmed zero in-content references before removal.
+
+### Docs
+- FID 458 references updated for the Phase 1 *Event Mode* → *Event Delivery Mode* rename + value-format shift (`Online (Zoom)` / `In-person in [City]`). No code change — all FID 458 consumers passthrough or substring-match the value.
+- Inline comments refreshed for the Phase 1 rename `Length Num` → `Length (number)` (FID 20 on Courses).
+
+---
+
 ## [3.8.6] — 2026-05-11
 
 ### Fixed

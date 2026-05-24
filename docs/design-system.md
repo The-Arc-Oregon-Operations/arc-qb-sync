@@ -156,12 +156,12 @@ Source: verified from plugin PHP files 2026-04-11. These are the shortcodes to u
 | `[event_dates]` | Date(s) (FID 45) |
 | `[event_time]` | Time (FID 89) |
 | `[event_venue]` | Venue name (FID 29) |
-| `[event_mode]` | Event mode / modality (FID 458) |
+| `[event_mode]` | Event Delivery Mode (FID 458) |
 | `[event_days_of_week]` | Day(s) of week (FID 413) |
 | `[event_length]` | Credit hours (FID 361) |
 | `[event_price]` | Training cost (FID 450) |
 | `[event_description]` | Event description (FID 440, HTML) |
-| `[event_instructors]` | Instructor name(s) text (FID 271) |
+| `[event_instructors]` | Event Instructor(s) — rich-text composite (FID 422), bold names |
 | `[event_instructor_slugs]` | Instructor WP slugs, pipe-separated (FID 449) |
 | `[event_image_url]` | Featured image URL (FID 461) |
 | `[event_flyer]` | Flyer URL (FID 267) |

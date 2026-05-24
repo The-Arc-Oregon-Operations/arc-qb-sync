@@ -16,7 +16,7 @@
 | 45 | Event Date(s) | `[event_dates]` | `esc_html()` |
 | 89 | Event Time | `[event_time]` | `esc_html()` |
 | 267 | Flyer URL | `[flyer_url]` | `esc_url()` |
-| 271 | Instructor(s) | `[instructors]` | `esc_html()` |
+| 422 | Event Instructor(s) | `[instructors]` | `wp_kses_post()` — rich-text; Oxford-comma chain over Instructor 1/2/3 with `<b>` wrapping per Phase 1 library design |
 | 361 | Credit Hours | *(see note)* | Exposed via `[arc_training_field id="361"]` — no dedicated shortcode by this name; `arc_td_sc_credit_hours()` is registered but not listed in original shortcode header |
 | 413 | Day(s) of Week | `[event_days_of_week]` | `esc_html()` |
 | 440 | Event Description | `[event_description]` | `wp_kses_post( wpautop() )` — long text / HTML |
@@ -24,7 +24,7 @@
 | 450 | Training Cost | `[training_cost]` | `wp_kses()` with allowlist for `<a>`, `<strong>`, `<em>`, `<span>`, `<br>`, `<strike>` |
 | 453 | Is Multi-Day | `[is_multiday]` | Returns `"1"` if truthy, `"0"` otherwise |
 | 454 | Is Multi-Session | `[is_multisession]` | Returns `"1"` if truthy, `"0"` otherwise |
-| 458 | Event Mode | `[event_mode]` | `esc_html()` — e.g. "Online", "In-person" |
+| 458 | Event Delivery Mode | `[event_mode]` | `esc_html()` — e.g. "Online (Zoom)", "In-person in [City]" (label rename + value-format updated in Phase 1, 2026-05-22) |
 | 461 | Featured Image URL | `[featured_image_url]` | `esc_url()` |
 
 ---
@@ -41,7 +41,6 @@ These shortcodes read from WP post meta on `arc_event` CPT posts. They require t
 | `[arc_event_time]` | `_arc_event_time` | 89 | `esc_html()` |
 | `[arc_event_venue]` | `_arc_event_venue` | 29 | `esc_html()` |
 | `[arc_event_days_of_week]` | `_arc_event_days_of_week` | 413 | `esc_html()` |
-| `[event_schedule]` | `_arc_event_schedule` | computed | Computed from FIDs 413 + 45, separated by ` • `. `esc_html()` |
 | `[arc_event_mode]` | `_arc_event_mode` | 458 | `esc_html()` |
 | `[arc_event_length]` | `_arc_event_length` | 361 | `esc_html()` |
 | `[arc_event_description]` | `_arc_event_description` | 440 | `wp_kses_post( wpautop() )` |
@@ -51,7 +50,8 @@ These shortcodes read from WP post meta on `arc_event` CPT posts. They require t
 | `[arc_event_image_url]` | `_arc_event_image_url` | 461 | `esc_url()` — legacy manual field |
 | `[arc_event_featured_image_url]` | `_arc_event_featured_image_url` | 464 | `esc_url()` — Image Assets lookup |
 | `[arc_event_hero_image_url]` | `_arc_event_hero_image_url` | 466 | `esc_url()` — Image Assets lookup |
-| `[arc_event_instructors_legacy]` | `_arc_event_instructors_legacy` | 271 | `esc_html()` — legacy manual field |
+| `[arc_event_instructors]` | `_arc_event_instructors` | 422 | `wp_kses_post()` — rich-text; primary v3.9.0+ |
+| `[arc_event_instructors_legacy]` / `[event_instructors_legacy]` | `_arc_event_instructors` (via alias) | 422 | **DEPRECATED v3.9.0** — alias to `[event_instructors]`; remove in a future release |
 | `[arc_event_instructor_slugs_legacy]` | `_arc_event_instructor_slugs_legacy` | 449 | `esc_html()` — pipe-separated, legacy |
 | *(removed v3.5.0)* | `_arc_event_instructor1_name` | 482 | Removed — never deployed in live templates |
 | *(removed v3.5.0)* | `_arc_event_instructor1_headshot_url` | 483 | Removed — never deployed in live templates |

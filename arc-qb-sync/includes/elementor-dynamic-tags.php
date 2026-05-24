@@ -92,7 +92,6 @@ class Arc_QB_Event_Meta_Tag extends \Elementor\Core\DynamicTags\Tag {
 			'title'              => array( __( 'Event title', 'arc-qb-sync' ),                '[event_title]' ),
 			'dates'              => array( __( 'Dates', 'arc-qb-sync' ),                      '[event_dates]' ),
 			'time'               => array( __( 'Time', 'arc-qb-sync' ),                       '[event_time]' ),
-			'schedule'           => array( __( 'Schedule (days • dates)', 'arc-qb-sync' ),    '[event_schedule]' ),
 			'days_of_week'       => array( __( 'Days of week', 'arc-qb-sync' ),               '[event_days_of_week]' ),
 			'venue'              => array( __( 'Venue / location', 'arc-qb-sync' ),           '[event_venue]' ),
 			'mode'               => array( __( 'Delivery mode', 'arc-qb-sync' ),              '[event_mode]' ),

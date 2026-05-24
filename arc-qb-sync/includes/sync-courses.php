@@ -271,7 +271,7 @@ function arc_qb_upsert_course( array $record ) {
 	update_post_meta( $post_id, '_arc_course_length_ms', $length_ms_raw ); // FID 14 raw ms — archived, not used for display
 
 	// _arc_course_length is the display-facing formatted string (e.g. "6 hours").
-	// Derived from FID 20 (Length Num — plain numeric hours), which is more reliable
+	// Derived from FID 20 (Length (number) — plain numeric hours), which is more reliable
 	// than converting FID 14's Duration ms value.
 	$length_hours_num = floatval( $length_hours_raw );
 	update_post_meta( $post_id, '_arc_course_length',
@@ -295,7 +295,7 @@ function arc_qb_upsert_course( array $record ) {
 	update_post_meta( $post_id, '_arc_course_hero_image_url',
 		esc_url_raw( arc_qb_get_course_field( $record, ARC_QB_COURSE_HERO_IMAGE_FID ) ) );     // 96
 
-	// FID 20 — Length Num (numeric hours value — also used above to generate _arc_course_length)
+	// FID 20 — Length (number) (numeric hours value — also used above to generate _arc_course_length)
 	update_post_meta( $post_id, '_arc_course_hours', sanitize_text_field( $length_hours_raw ) );
 
 	// FID 84 — Link to Course Overview Page

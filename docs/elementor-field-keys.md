@@ -74,9 +74,8 @@ Fields that output HTML should be placed in an **HTML** widget, not a plain Text
 | `_arc_event_dates` | Date string(s) | Plain text |
 | `_arc_event_time` | Time string | Plain text |
 | `_arc_event_days_of_week` | Days of week | Plain text |
-| `_arc_event_schedule` | Computed: days of week + " • " + dates. Empty if both source fields are blank. | Plain text |
 | `_arc_event_venue` | Venue name / location | Plain text |
-| `_arc_event_mode` | Delivery mode (Online / In-Person / Hybrid) | Plain text |
+| `_arc_event_mode` | Event Delivery Mode (e.g. "Online (Zoom)", "In-person in [City]") | Plain text |
 | `_arc_event_length` | Length description | Plain text |
 | `_arc_event_description` | Event description | HTML |
 | `_arc_event_price` | Price / pricing info (may contain links) | HTML |
@@ -87,7 +86,7 @@ Fields that output HTML should be placed in an **HTML** widget, not a plain Text
 | `_arc_event_image_url` | Legacy manual image URL | URL — wire to image src |
 | `_arc_event_is_multiday` | Multi-day flag — `"1"` or `"0"` | Plain text (flag) |
 | `_arc_event_is_multisession` | Multi-session flag — `"1"` or `"0"` | Plain text (flag) |
-| `_arc_event_instructors_legacy` | Legacy instructor name string (pre-CPT) | Plain text |
+| `_arc_event_instructors` | Event Instructor(s) — rich-text Oxford-comma composite (FID 422) with `<b>`-wrapped names. **Wire as HTML in Elementor.** | HTML |
 | `_arc_event_instructor_slugs_legacy` | Legacy instructor slug string (pre-CPT) | Plain text |
 | `_arc_qb_event_id` | QB event record ID | Plain text (internal use) |
 
