@@ -19,6 +19,22 @@ The README is the shortcode/user-facing reference; CHANGELOG records every shipp
 
 ---
 
+## Transitional Status — Feature Freeze and Sunset — Standing Rule
+
+`arc-qb-sync` is a transitional tool, and its end-state is sunset. It made what was possible visible and unlocked the path to `arc-event-reg`, and it still carries live fields that render current and transitional training events on thearcoregon.org. When Alan decides the timing is right (Claude does not initiate), the functionality remaining here is carefully unwound and folded into `arc-event-reg`.
+
+Until then:
+
+- **No new features.** Do not add new capability to this plugin.
+- **Tweaks only**, and only where needed to keep transitional events rendering correctly.
+- Surface anything that wants a new feature here as a candidate for `arc-event-reg` instead.
+
+No hard timeline; this gates nothing. Full direction lives in `event-management/OVERHAUL.md` ("Direction of travel") and `event-management/ROADMAP.md` ("Upcoming milestone").
+
+> **Confirmed (2026-06-17 · Alan):** arc-qb-sync is feature-frozen and slated for sunset into arc-event-reg on Alan's timing; no new features, tweaks only to keep transitional events working.
+
+---
+
 ## How This Project Divides Between Cowork and Code
 
 Most work in this repo is **Code mode** — the plugin ships as numbered versions, each one a discrete code change. Cowork handles the orbit around that.
